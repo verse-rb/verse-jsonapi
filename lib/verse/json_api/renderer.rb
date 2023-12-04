@@ -3,11 +3,9 @@
 module Verse
   module JsonApi
     class Renderer
-      attr_accessor :type, :primary_key, :field_set
+      attr_accessor :field_set
 
       def initialize
-        @type = "objects"
-        @primary_key = "id"
         @field_set = []
       end
 
@@ -31,16 +29,38 @@ module Verse
         when Exception
           render_error(object)
         else
-          render_custom(object)
+          { data: object.to_h }
         end
       end
 
       def render_error(error)
         case error
         when Verse::Error::Base
-          raise "TODO"
+          {
+            errors: [
+              {
+                status: error.class.http_code.to_s,
+                title:  error.class.name,
+                detail: error.message,
+                meta:{
+                  backtrace: error.backtrace
+                }
+              }
+            ]
+          }
         else
-          raise "TODO"
+          {
+            errors: [
+              {
+                status: "500",
+                title: error.class.name,
+                detail:  error.message,
+                meta:{
+                  backtrace: error.backtrace
+                }
+              }
+            ]
+          }
         end
       end
 
@@ -150,63 +170,8 @@ module Verse
         relationships.empty? ? nil : relationships
       end
 
-      def render_custom(object)
-        {
-          type: self.type,
-          id: object[self.primary_key]&.to_s,
-          attributes: object.except(
-            self.primary_key.to_s,
-            self.primary_key.to_sym
-          )
-        }
-      end
-
       def render_metadata(object)
         object.respond_to?(:metadata) ? object.metadata : nil
-      end
-
-      def render_model(object)
-        included = render_included(object, object.included).uniq
-
-        {
-          data: render_object(object),
-          meta: render_metadata(object)
-        }.compact
-      end
-
-
-      def render_included(object, included)
-        object.relations.each_key do |key|
-          relations = object.relations[key]
-          next if relations.nil?
-
-          binding.pry
-
-          type = key.to_s.gsub(/_record$/, "").pluralize
-          case relations
-          when Array
-            relations.each do |data|
-              data[:type] = type
-              included << render_included_object(data)
-              render_included(data, included)
-            end
-          else
-            relations[:type] = type
-            included << render_included_object(relations)
-            render_included(relations, included)
-          end
-        end
-
-        included.empty? ? nil : included.uniq
-      end
-
-      def render_included_object(object)
-        {
-          type: object.type,
-          id: object.id.to_s,
-          attributes: render_attributes(object),
-          relationships: render_relationships(object)
-        }
       end
 
     end

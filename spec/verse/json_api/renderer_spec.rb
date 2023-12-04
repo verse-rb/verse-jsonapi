@@ -105,7 +105,7 @@ RSpec.describe Verse::JsonApi::Renderer do
       collection = Verse::Util::ArrayWithMetadata.new([
         UserRecord.new({ id: 1, name: "John" }),
         UserRecord.new({ id: 2, name: "Jane" })
-      ], { total: 2 })
+      ], metadata: { total: 2 })
 
       output = subject.render(collection)
       expect(output).to eq({
@@ -114,25 +114,25 @@ RSpec.describe Verse::JsonApi::Renderer do
             type: "users",
             id: "1",
             attributes: { name: "John" },
-            relationships: {
-              posts: { data: [] },
-              comments: { data: [] },
-              account: { data: nil }
-            }
           },
           {
             type: "users",
             id: "2",
             attributes: { name: "Jane" },
-            relationships: {
-              posts: { data: [] },
-              comments: { data: [] },
-              account: { data: nil }
-            }
           }
         ],
-        included: [],
         meta: { total: 2 }
+      })
+    end
+  end
+
+  context "render custom object" do
+    it "renders a hash" do
+      output = subject.render({ test: "test" })
+      expect(output).to eq({
+        data: {
+          test: "test"
+        }
       })
     end
   end
@@ -147,9 +147,11 @@ RSpec.describe Verse::JsonApi::Renderer do
           errors: [
             {
               status: "500",
-              code: "500",
-              title: "Internal Server Error",
-              detail: "test"
+              title: "Verse::Error::Base",
+              detail: "test",
+              meta: {
+                backtrace: nil
+              }
             }
           ]
         })
@@ -165,9 +167,11 @@ RSpec.describe Verse::JsonApi::Renderer do
           errors: [
             {
               status: "500",
-              code: "500",
-              title: "Internal Server Error",
-              detail: "test"
+              title: "StandardError",
+              detail: "test",
+              meta: {
+                backtrace: nil
+              }
             }
           ]
         })
