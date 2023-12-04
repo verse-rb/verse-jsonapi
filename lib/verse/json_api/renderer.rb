@@ -183,5 +183,3 @@ module Verse
     end
   end
 end
-
-Verse::Http::Renderer[:json_api] = Verse::JsonApi::Renderer
