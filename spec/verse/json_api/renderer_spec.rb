@@ -2,12 +2,18 @@ require "spec_helper"
 require_relative "./spec_data"
 
 RSpec.describe Verse::JsonApi::Renderer do
+  let(:ctx) {
+    out = double("ctx", content_type: nil)
+    expect(out).to receive(:content_type).with("application/vnd.api+json")
+    out
+  }
+
   context "render object" do
     it "renders a model" do
       model = UserRecord.new({ id: 1, name: "John" })
 
-      output = subject.render(model)
-      expect(output).to eq({
+      output = subject.render(model, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
         data: {
           type: "users",
           id: "1",
@@ -32,9 +38,9 @@ RSpec.describe Verse::JsonApi::Renderer do
       set.add_collection([UserRecord, "posts"], "1", posts_collection)
       model = UserRecord.new({ id: 1, name: "John" }, include_set: set)
 
-      output = subject.render(model)
+      output = subject.render(model, ctx)
 
-      expect(output).to eq({
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
         data: {
           type: "users",
           id: "1",
@@ -84,8 +90,8 @@ RSpec.describe Verse::JsonApi::Renderer do
         UserRecord.new({ id: 2, name: "Jane" })
       ]
 
-      output = subject.render(collection)
-      expect(output).to eq({
+      output = subject.render(collection, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
         data: [
           {
             type: "users",
@@ -107,8 +113,8 @@ RSpec.describe Verse::JsonApi::Renderer do
         UserRecord.new({ id: 2, name: "Jane" })
       ], metadata: { total: 2 })
 
-      output = subject.render(collection)
-      expect(output).to eq({
+      output = subject.render(collection, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
         data: [
           {
             type: "users",
@@ -128,8 +134,8 @@ RSpec.describe Verse::JsonApi::Renderer do
 
   context "render custom object" do
     it "renders a hash" do
-      output = subject.render({ test: "test" })
-      expect(output).to eq({
+      output = subject.render({test: "test"}, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
         data: {
           test: "test"
         }
@@ -142,8 +148,8 @@ RSpec.describe Verse::JsonApi::Renderer do
       it "renders an error" do
         error = Verse::Error::Base.new("test")
 
-        output = subject.render(error)
-        expect(output).to eq({
+        output = subject.render(error, ctx)
+        expect(JSON.parse(output, symbolize_names: true)).to eq({
           errors: [
             {
               status: "500",
@@ -162,8 +168,8 @@ RSpec.describe Verse::JsonApi::Renderer do
       it "renders an error" do
         error = StandardError.new("test")
 
-        output = subject.render(error)
-        expect(output).to eq({
+        output = subject.render(error, ctx)
+        expect(JSON.parse(output, symbolize_names: true)).to eq({
           errors: [
             {
               status: "500",

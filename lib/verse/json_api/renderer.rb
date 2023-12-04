@@ -1,36 +1,42 @@
 # frozen_string_literal: true
 
+require "verse/http"
+
 module Verse
   module JsonApi
     class Renderer
-      attr_accessor :field_set
+      attr_accessor :field_set, :pretty
 
       def initialize
         @field_set = []
+        @pretty = true
       end
 
-      def render(object, field_set = nil)
-        field_set ||= self.field_set
+      def render(object, ctx)
+        ctx.content_type(ctx.content_type || "application/vnd.api+json")
 
-        case object
-        when Verse::Model::Record::Base
-          included = gather_included(object)
+        output = \
+          case object
+          when Verse::Model::Record::Base
+            included = gather_included(object)
 
-          out = {}
-          out[:data] = render_record(object, field_set, false)
+            out = {}
+            out[:data] = render_record(object, self.field_set, false)
 
-          unless included.empty?
-            out[:included] = included.map{ |r| render_record(r, field_set, false) }
+            unless included.empty?
+              out[:included] = included.map{ |r| render_record(r, self.field_set, false) }
+            end
+
+            out
+          when Array, Verse::Util::ArrayWithMetadata
+            render_collection(object, self.field_set)
+          when Exception
+            render_error(object)
+          else
+            { data: object.to_h }
           end
 
-          out
-        when Array, Verse::Util::ArrayWithMetadata
-          render_collection(object, field_set)
-        when Exception
-          render_error(object)
-        else
-          { data: object.to_h }
-        end
+          @pretty ? JSON.pretty_generate(output) : output.to_json
       end
 
       def render_error(error)
@@ -177,3 +183,5 @@ module Verse
     end
   end
 end
+
+Verse::Http::Renderer[:json_api] = Verse::JsonApi::Renderer
