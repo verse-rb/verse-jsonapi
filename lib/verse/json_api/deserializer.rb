@@ -15,7 +15,7 @@ module Verse
       # @note: Works only for structure with `data` key; documents with `meta` or `errors` key are not
       #       supported yet. Also, `link` keys are ignored for simplification.
       def deserialize(input, object_reference_index = {})
-        return deserialize(JSON.parse(input), object_reference_index) if input.is_a?(String)
+        return deserialize(JSON.parse(input, symbolize_names: true), object_reference_index) if input.is_a?(String)
 
         if input[:errors]
           __raise__ "Object is error object: #{input[:errors].to_json}"
