@@ -15,6 +15,15 @@ module Verse
       def render(object, ctx)
         ctx.content_type(ctx.content_type || "application/vnd.api+json")
 
+        case object
+        when Verse::Error::Base
+          ctx.status object.class.http_code
+        when Exception
+          ctx.status 500
+        else
+          # keep status as-is
+        end
+
         output = \
           case object
           when Verse::Model::Record::Base

@@ -5,6 +5,8 @@ RSpec.describe Verse::JsonApi::Renderer do
   let(:ctx) {
     out = double("ctx", content_type: nil)
     expect(out).to receive(:content_type).with("application/vnd.api+json")
+    expect(out).to receive(:status=)
+
     out
   }
 
