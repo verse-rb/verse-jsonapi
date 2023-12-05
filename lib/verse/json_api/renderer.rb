@@ -33,7 +33,7 @@ module Verse
           when Exception
             render_error(object)
           else
-            { data: object.to_h }
+            { data: object }
           end
 
           @pretty ? JSON.pretty_generate(output) : output.to_json
