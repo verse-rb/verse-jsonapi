@@ -5,7 +5,7 @@ require "verse/http"
 module Verse
   module JsonApi
     class Renderer
-      attr_accessor :field_set, :pretty
+      attr_accessor :field_set, :pretty, :meta
 
       def initialize
         @field_set = []
@@ -34,6 +34,11 @@ module Verse
             render_error(object)
           else
             { data: object }
+          end
+
+          if meta
+            output[:meta] ||= {}
+            output[:meta].merge!(meta)
           end
 
           @pretty ? JSON.pretty_generate(output) : output.to_json
