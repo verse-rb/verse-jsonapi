@@ -145,6 +145,23 @@ RSpec.describe Verse::JsonApi::Renderer do
     end
   end
 
+  context "render object with custom primary key" do
+    it "renders a model" do
+      model = CategoryRecord.new({ name: "test" })
+
+      output = subject.render(model, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq({
+        data: {
+          type: "categories",
+          id: "test",
+          attributes: {
+            name: "test"
+          }
+        }
+      })
+    end
+  end
+
   context "render error" do
     context "verse error" do
       it "renders an error" do

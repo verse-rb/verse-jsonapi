@@ -15,10 +15,21 @@ require "bundler"
 Bundler.require
 
 require "verse/json_api"
+require "verse/http/spec"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
+
+  # Add user fixture
+  Verse::Http::Spec::HttpHelper.add_user("user", :user)
+
+  # set a dummy role for testing
+  Verse::Auth::Context[:user] = %w[
+    users.read.*
+    users.write.*
+    verse-http:foo.*.*
+  ]
 
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!

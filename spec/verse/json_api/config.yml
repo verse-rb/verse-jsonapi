@@ -1,0 +1,6 @@
+service_name: verse-jsonapi
+description: testing json api helpers
+plugins:
+  - name: http
+logging:
+  level: warn

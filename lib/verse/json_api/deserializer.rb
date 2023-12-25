@@ -52,35 +52,14 @@ module Verse
       def deserialize_data(data, object_reference_index, ref_operations)
         out = data.slice(:id, :type)
 
-        data[:attributes]&.tap{ |att| out.merge!(att) }
+        data[:attributes]&.tap{ |att| out = att.merge(out) }
 
         # prepare the keys first.
         data[:relationships]&.each do |rel_name, _|
           out[rel_name] = nil
         end
 
-        struct = ClosedStruct.new(out) do
-          # rubocop:disable Lint/NestedMethodDefinition
-          # monkey patch to_h to acts as "to_deep_h", so
-          # all internal ClosedStruct are turned to hash too.
-          # it removes also the `type` field, so we can pass it as
-          # arguments to build records.
-          def to_h
-            hashify = ->(elm) {
-              case elm
-              when ClosedStruct
-                elm.to_h
-              when Array
-                elm.map{ |child| hashify.call(child) }
-              else
-                elm
-              end
-            }
-
-            super.except(:type).transform_values!{ |value| hashify.call(value) }
-          end
-          # rubocop:enable Lint/NestedMethodDefinition
-        end
+        struct = ClosedStruct.new(out)
 
         # prepare the postprocessing pointers:
         data[:relationships]&.each do |rel_name, rel_value|

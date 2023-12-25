@@ -5,4 +5,5 @@ require_relative "json_api/version"
 require_relative "json_api/renderer"
 
 require_relative "json_api/deserializer"
-require_relative "json_api/schema"
+
+require_relative "json_api/exposition_dsl"
