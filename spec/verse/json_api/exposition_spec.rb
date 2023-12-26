@@ -14,6 +14,10 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     )
   end
 
+  after do
+    Verse.stop
+  end
+
   context "#create" do
     it "allows creation with good input", as: :user do
 
@@ -43,4 +47,17 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
   end
 
+  context "#delete" do
+    it "allows deletion with good input", as: :user do
+
+      expect_any_instance_of(TestService).to receive(:delete){ |obj, id|
+        expect(id).to eq("1")
+      }
+
+      delete "/users/1"
+
+      expect(last_response.status).to eq(204)
+    end
+
+  end
 end

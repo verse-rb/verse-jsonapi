@@ -24,8 +24,10 @@ module Verse
           dsl = self
 
           body = @body || ->(service) {
-            key_name = self.path[/:(\w+)/, 1]&.to_sym
+            key_name = dsl.path[/:(\w+)/, 1]&.to_sym
+            server.response.status = 204
             service.delete(params[key_name.to_sym])
+            server.no_content
           }
 
           @exposition_class.class_eval do
@@ -35,7 +37,7 @@ module Verse
             end
             define_method(:delete) {
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
-              dsl.body.call send(service)
+              instance_exec(service, &body)
             }
           end
         end
