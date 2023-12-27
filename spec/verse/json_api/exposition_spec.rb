@@ -60,4 +60,111 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
   end
+
+  context "#index", as: :user do
+    it "allows index" do
+      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({})
+        expect(included).to eq([])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({id: 1, name: "John"})])
+
+      get "/users/"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John" }
+            }
+          ]
+        }
+      )
+    end
+
+    it "allows index with filters" do
+      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({name: "John"})
+        expect(included).to eq([])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({id: 1, name: "John"})])
+
+      get "/users/?filter[name]=John"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John" }
+            }
+          ]
+        }
+      )
+    end
+
+    it "filters out unallowed filters" do
+      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({})
+        expect(included).to eq([])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({id: 1, name: "John"})])
+
+      get "/users/?filter[unallowed]=John"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John" }
+            }
+          ]
+        }
+      )
+    end
+
+    it "allows filter declared in allowed_filters" do
+      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({name__match: "John"})
+        expect(included).to eq([])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({id: 1, name: "John"})])
+
+      get "/users/?filter[name__match]=John"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John" }
+            }
+          ]
+        }
+      )
+    end
+
+  end
 end

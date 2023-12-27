@@ -1,6 +1,7 @@
 require_relative "./helper"
 require_relative "./create"
 require_relative "./delete"
+require_relative "./index"
 
 module Verse
   module JsonApi
@@ -27,6 +28,10 @@ module Verse
         # Declare a JSON::API delete route for this exposition.
         def delete(&block)
           Delete.new(@exposition_class, self, &block)
+        end
+
+        def index(&block)
+          Index.new(@exposition_class, self, &block)
         end
       end
     end

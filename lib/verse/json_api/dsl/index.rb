@@ -14,15 +14,15 @@ module Verse
           install
         end
 
-        instruction :path, ":resource_id"
-        instruction :method, :delete
+        instruction :path, ""
+        instruction :method, :get
 
         instruction :body
 
-        instruction :extra_filters, []
+        instruction :allowed_filters, []
         instruction :blacklist_filters, []
 
-        instruct    :max_items_per_pages, 1000
+        instruction :max_items_per_pages, 1000
 
         def install
           dsl = self
@@ -45,25 +45,26 @@ module Verse
             end
             define_method(:index) {
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
-              dsl.body.call send(service)
+              instance_exec(service, &body)
             }
           end
         end
 
         def create_schema
+          dsl = self
           Dry::Schema.Params do
             optional(:page).value(:integer).value(gt?: 0)
-            optional(:per_page).value(:integer).value(gt?: 0, lt?: max_items_per_pages + 1)
+            optional(:per_page).value(:integer).value(gt?: 0, lt?: dsl.max_items_per_pages + 1)
             optional(:sort).value(:string)
             optional(:count).value(:bool)
 
             optional(:filter).hash do
-              record.fields.each do |field|
-                next if blacklist_filters.include?(field[0])
-                optional(field[0]).value(type:? Object)
+              dsl.parent.resource_class.fields.each do |field|
+                next if dsl.blacklist_filters.include?(field[0])
+                optional(field[0]).value(type?: Object)
               end
 
-              extra_filters.each do |field|
+              dsl.allowed_filters.each do |field|
                 case field
                 when Proc
                   field[1].call(optional(field[0].to_sym))

@@ -23,5 +23,8 @@ class TestExposition < Verse::Exposition::Base
 
     create
     delete
+    index do
+      allowed_filters :name__match
+    end
   end
 end
