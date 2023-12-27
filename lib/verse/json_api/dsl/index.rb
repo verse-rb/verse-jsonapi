@@ -74,7 +74,7 @@ module Verse
               end
             end
 
-            optional(:included).array(:string)
+            optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
           end
         end
 

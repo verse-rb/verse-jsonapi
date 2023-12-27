@@ -1,5 +1,5 @@
 require "spec_helper"
-require_relative "./spec_data"
+require_relative "data/spec_data"
 
 RSpec.describe Verse::JsonApi::Renderer do
   let(:ctx) {

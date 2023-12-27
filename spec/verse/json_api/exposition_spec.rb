@@ -1,16 +1,16 @@
 require "spec_helper"
-require_relative "./spec_data"
+require_relative "data/spec_data"
 
 RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
   before do
     Verse.on_boot {
-      require_relative "./test_exposition"
+      require_relative "data/test_exposition"
       TestExposition.register
     }
 
     Verse.start(
       :test,
-      config_path: File.join(__dir__, "config.yml")
+      config_path: File.join(__dir__, "data/config.yml")
     )
   end
 
@@ -164,6 +164,13 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           ]
         }
       )
+    end
+
+    it "rejects if user request included resource not allowed" do
+      get "/users/?included[]=comments"
+
+      expect(last_response.status).to eq(422)
+      puts last_response.body
     end
 
   end

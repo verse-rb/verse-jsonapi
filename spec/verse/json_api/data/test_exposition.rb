@@ -21,6 +21,8 @@ class TestExposition < Verse::Exposition::Base
   json_api UserRecord do
     # service :service
 
+    allowed_included "posts"
+
     create
     delete
     index do
