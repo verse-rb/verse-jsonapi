@@ -8,7 +8,9 @@ class TestService < Verse::Service::Base
   end
 
   def index(filters, included: [], page: 1, items_per_page: 10, sort: nil, query_count: false)
+  end
 
+  def show(id, included: [])
   end
 end
 
@@ -22,6 +24,9 @@ class TestExposition < Verse::Exposition::Base
     # service :service
 
     allowed_included "posts"
+
+    show
+    update
 
     create
     delete

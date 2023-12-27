@@ -2,6 +2,8 @@ require_relative "./helper"
 require_relative "./create"
 require_relative "./delete"
 require_relative "./index"
+require_relative "./show"
+require_relative "./update"
 
 module Verse
   module JsonApi
@@ -33,6 +35,14 @@ module Verse
 
         def index(&block)
           Index.new(@exposition_class, self, &block)
+        end
+
+        def show(&block)
+          Show.new(@exposition_class, self, &block)
+        end
+
+        def update(&block)
+          Update.new(@exposition_class, self, &block)
         end
       end
     end

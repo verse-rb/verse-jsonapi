@@ -1,7 +1,7 @@
 module Verse
   module JsonApi
     module Dsl
-      class Index
+      class Show
         extend Helper
 
         attr_reader :parent, :exposition_class
@@ -19,28 +19,20 @@ module Verse
 
         instruction :body
 
-        instruction :max_items_per_pages, 1000
-
         def install
           dsl = self
 
           body = @body || ->(service) {
-            service.index(
-              params.fetch(:filter, {}),
-              included: params.fetch(:included, []),
-              page: params.fetch(:page, 1),
-              items_per_page: params.fetch(:per_page, dsl.max_items_per_pages),
-              sort: params&.fetch(:sort, nil)&.split(","),
-              query_count: params.fetch(:count, false)
-            )
+            key_name = dsl.path[/:(\w+)/, 1]&.to_sym
+            service.show(params[key_name.to_sym], included: params.fetch(:included, []))
           }
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, File.join(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
-              desc "List #{dsl.parent.resource_class.type}"
+              desc "Show a specific #{dsl.parent.resource_class.type}"
               input dsl.create_schema
             end
-            define_method(:index) {
+            define_method(:show) {
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
               instance_exec(service, &body)
             }
@@ -50,14 +42,12 @@ module Verse
         def create_schema
           dsl = self
           Dry::Schema.Params do
-            key_name = path[/:(\w+)/, 1]&.to_sym
+            key_name = dsl.path[/:(\w+)/, 1]&.to_sym
 
             raise "incorrect path for show: `#{path}`" unless key_name
 
-            Dry::Schema.Params do
-              required(key_name).filled(:string)
-              optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
-            end
+            required(key_name).value(type?: String)
+            optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
           end
         end
 

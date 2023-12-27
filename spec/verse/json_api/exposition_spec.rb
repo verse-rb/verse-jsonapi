@@ -200,4 +200,106 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
   end
+
+  context "#show", as: :user do
+    it "allows show" do
+      expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
+        expect(id).to eq("1")
+        expect(included).to eq([])
+      }.and_return(UserRecord.new({id: 1, name: "John"}))
+
+      get "/users/1"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: {
+            id: "1",
+            type: "users",
+            attributes: { name: "John" }
+          }
+        }
+      )
+    end
+
+    it "disallow if included is not in the list" do
+      get "/users/1?included[]=comments"
+
+      expect(last_response.status).to eq(422)
+    end
+
+    it "allow if included is in the list" do
+      expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
+        expect(id).to eq("1")
+        expect(included).to eq(["posts"])
+      }.and_return(UserRecord.new({id: 1, name: "John"}))
+
+      get "/users/1?included[]=posts"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: {
+            id: "1",
+            type: "users",
+            attributes: { name: "John" }
+          }
+        }
+      )
+    end
+  end
+
+  context "#update", as: :user do
+    it "allows update" do
+      expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
+        expect(id).to eq("1")
+        expect(struct.name).to eq("John")
+        expect(struct.type).to eq("users")
+      }.and_return(UserRecord.new({id: 1, name: "John"}))
+
+      patch "/users/1", {
+        data: {
+          type: "users",
+          attributes: { name: "John" }
+        }
+      }
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: {
+            id: "1",
+            type: "users",
+            attributes: { name: "John" }
+          }
+        }
+      )
+    end
+
+    it "removes illegal fields" do
+      expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
+        expect(id).to eq("1")
+        expect(struct.name).to eq("John")
+        expect(struct.type).to eq("users")
+      }.and_return(UserRecord.new({id: 1, name: "John"}))
+
+      patch "/users/1", {
+        data: {
+          type: "users",
+          attributes: { name: "John", secret_field: "Very secret" }
+        }
+      }
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: {
+            id: "1",
+            type: "users",
+            attributes: { name: "John" }
+          }
+        }
+      )
+    end
+  end
 end
