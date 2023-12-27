@@ -7,7 +7,6 @@ module Verse
         NOTHING = Object.new
 
         def instruction(name, default_value = nil)
-
           case default_value
           when Hash
             define_method(name) do |*values|

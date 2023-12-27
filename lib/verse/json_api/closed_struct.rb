@@ -2,7 +2,7 @@ module Verse
   module JsonApi
     # Inspired by https://github.com/obrok/closed_struct/blob/master/lib/closed_struct.rb
     class ClosedStruct
-      def initialize(contents, &block)
+      def initialize(**contents, &block)
         @contents = contents.transform_keys(&:to_sym)
 
         singleton_class = (class << self; self; end)

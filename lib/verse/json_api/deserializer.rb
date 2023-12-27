@@ -59,7 +59,7 @@ module Verse
           out[rel_name] = nil
         end
 
-        struct = ClosedStruct.new(out)
+        struct = ClosedStruct.new(**out)
 
         # prepare the postprocessing pointers:
         data[:relationships]&.each do |rel_name, rel_value|
