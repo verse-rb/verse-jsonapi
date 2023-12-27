@@ -173,5 +173,31 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       puts last_response.body
     end
 
+    it "allows if user request included resource allowed" do
+      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({})
+        expect(included).to eq(["posts"])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({id: 1, name: "John"})])
+
+      get "/users/?included[]=posts"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John" }
+            }
+          ]
+        }
+      )
+    end
+
   end
 end
