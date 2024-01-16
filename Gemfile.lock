@@ -13,7 +13,7 @@ GIT
 
 GIT
   remote: git@github.com:verse-rb/verse-http.git
-  revision: 7726940d58554aad4c695f4eab5c30bd73ca6e1b
+  revision: 763baa4ffe228062f7c975aca1fc644714c3e745
   branch: master
   specs:
     verse-http (0.1.0)
