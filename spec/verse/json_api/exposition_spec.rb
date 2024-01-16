@@ -170,7 +170,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       get "/users?included[]=comments"
 
       expect(last_response.status).to eq(422)
-      puts last_response.body
+      expect(JSON.parse(last_response.body, symbolize_names: true)[:errors].first[:type]).to eq(
+        "validation_error"
+      )
     end
 
     it "allows if user request included resource allowed" do
