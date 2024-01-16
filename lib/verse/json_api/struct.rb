@@ -84,6 +84,8 @@ module Verse
                 end
               }
             }.compact
+          when array?
+            Helper.arr_to_h(@data)
           else
             @data
           end
