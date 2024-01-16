@@ -6,6 +6,12 @@ module Verse
 
         NOTHING = Object.new
 
+        def build_path(*args)
+          args.reject(&:empty?).map do |x|
+            x = (x != "/" && x[-1] == "/") ? x[0..-2] : x
+          end.join("/")
+        end
+
         def instruction(name, default_value = nil)
           case default_value
           when Hash

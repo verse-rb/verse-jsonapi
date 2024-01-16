@@ -26,7 +26,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(struct.type).to eq("users")
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
-      post "/users/", {
+      post "/users", {
         data: {
           type: "users",
           attributes: { name: "John" }
@@ -72,7 +72,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(query_count).to eq(false)
       }.and_return([UserRecord.new({id: 1, name: "John"})])
 
-      get "/users/"
+      get "/users"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -98,7 +98,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(query_count).to eq(false)
       }.and_return([UserRecord.new({id: 1, name: "John"})])
 
-      get "/users/?filter[name]=John"
+      get "/users?filter[name]=John"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -124,7 +124,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(query_count).to eq(false)
       }.and_return([UserRecord.new({id: 1, name: "John"})])
 
-      get "/users/?filter[unallowed]=John"
+      get "/users?filter[unallowed]=John"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -150,7 +150,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(query_count).to eq(false)
       }.and_return([UserRecord.new({id: 1, name: "John"})])
 
-      get "/users/?filter[name__match]=John"
+      get "/users?filter[name__match]=John"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -167,7 +167,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "rejects if user request included resource not allowed" do
-      get "/users/?included[]=comments"
+      get "/users?included[]=comments"
 
       expect(last_response.status).to eq(422)
       puts last_response.body
@@ -183,7 +183,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(query_count).to eq(false)
       }.and_return([UserRecord.new({id: 1, name: "John"})])
 
-      get "/users/?included[]=posts"
+      get "/users?included[]=posts"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(

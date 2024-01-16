@@ -24,12 +24,6 @@ module Verse
 
         instruction :max_items_per_pages, 1000
 
-        def build_path(*args)
-          args.map do |x|
-            x[-1] == "/"  ? x[0..-2] : x
-          end.join("/")
-        end
-
         def install
           dsl = self
 
@@ -45,7 +39,7 @@ module Verse
           }
 
           @exposition_class.class_eval do
-            expose on_http(dsl.method, dsl.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
+            expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "List #{dsl.parent.resource_class.type}"
               input dsl.create_schema
             end
