@@ -28,7 +28,7 @@ module Verse
           dsl = self
 
           body = @body || ->(value) {
-            send(dsl.parent.service).create(value)
+            send(dsl.parent.service).create(value.attributes)
           }
 
           @exposition_class.class_eval do
