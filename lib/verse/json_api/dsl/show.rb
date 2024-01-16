@@ -46,7 +46,7 @@ module Verse
 
             raise "incorrect path for show: `#{path}`" unless key_name
 
-            required(key_name).value(type?: String)
+            dsl.parent.key_type.call(required(key_name))
             optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
           end
         end

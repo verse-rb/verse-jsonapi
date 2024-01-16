@@ -86,7 +86,8 @@ module Verse
 
             raise "incorrect path for update: `#{path}`" unless key_name
 
-            required(key_name).value(:str?)
+            dsl.parent.key_type.call(required(key_name))
+
             required(:data).hash do
               required(:type).value(:str?, included_in?: dsl.parent.resource_class.type)
               required(:attributes).hash(&schema)

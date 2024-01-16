@@ -47,8 +47,9 @@ module Verse
 
           raise "incorrect path for delete: `#{path}`" unless key_name
 
+          dsl = self
           Dry::Schema.Params do
-            required(key_name).filled(:string)
+            dsl.parent.key_type.call(required(key_name))
           end
         end
 

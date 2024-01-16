@@ -29,7 +29,7 @@ module Verse
                 instance_variable_set("@#{name}", block)
                 self
               else
-                instance_variable_get("@#{name}") || default_value.call
+                instance_variable_get("@#{name}") || default_value
               end
             end
           when Array

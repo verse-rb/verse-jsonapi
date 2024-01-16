@@ -50,7 +50,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     it "allows deletion with good input", as: :user do
 
       expect_any_instance_of(TestService).to receive(:delete){ |obj, id|
-        expect(id).to eq("1")
+        expect(id).to eq(1)
       }
 
       delete "/users/1"
@@ -205,7 +205,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
   context "#show", as: :user do
     it "allows show" do
       expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
-        expect(id).to eq("1")
+        expect(id).to eq(1)
         expect(included).to eq([])
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
@@ -231,7 +231,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
     it "allow if included is in the list" do
       expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
-        expect(id).to eq("1")
+        expect(id).to eq(1)
         expect(included).to eq(["posts"])
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
@@ -253,7 +253,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
   context "#update", as: :user do
     it "allows update" do
       expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
-        expect(id).to eq("1")
+        expect(id).to eq(1)
         expect(struct[:name]).to eq("John")
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
@@ -278,7 +278,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
     it "removes illegal fields" do
       expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
-        expect(id).to eq("1")
+        expect(id).to eq(1)
         expect(struct[:name]).to eq("John")
         expect(struct[:secret_field]).to eq(nil)
       }.and_return(UserRecord.new({id: 1, name: "John"}))

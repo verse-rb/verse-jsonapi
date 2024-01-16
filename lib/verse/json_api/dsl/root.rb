@@ -16,6 +16,7 @@ module Verse
         instruction :path, ""
         instruction :service, :service
         instruction :allowed_included, []
+        instruction :key_type, proc{ |key| key.filled(:integer) }
 
         def initialize(exposition_class, resource_class, &block)
           @exposition_class = exposition_class
