@@ -21,9 +21,8 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
   context "#create" do
     it "allows creation with good input", as: :user do
 
-      expect_any_instance_of(TestService).to receive(:create){ |obj, struct|
-        expect(struct.name).to eq("John")
-        expect(struct.type).to eq("users")
+      expect_any_instance_of(TestService).to receive(:create){ |obj, attr|
+        expect(attr[:name]).to eq("John")
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
       post "/users", {
