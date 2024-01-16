@@ -1,4 +1,4 @@
-require_relative "./closed_struct"
+require_relative "./struct"
 require_relative "./bad_format_error"
 
 module Verse
@@ -52,37 +52,35 @@ module Verse
       def deserialize_data(data, object_reference_index, ref_operations)
         out = data.slice(:id, :type)
 
-        data[:attributes]&.tap{ |att| out = att.merge(out) }
-
-        # prepare the keys first.
-        data[:relationships]&.each do |rel_name, _|
-          out[rel_name] = nil
+        data[:attributes]&.tap do |att|
+          out[:attributes] = att.merge(out)
         end
 
-        struct = ClosedStruct.new(**out)
+        struct = Struct.new(out)
 
         # prepare the postprocessing pointers:
         data[:relationships]&.each do |rel_name, rel_value|
-          out[rel_name] = nil
+          out[:relationships] ||= {}
           content = rel_value&.[](:data)
 
           case content
           when Array
-            ref_operations << -> {
-              struct.__update(rel_name, content.map{ |it|
+            ref_operations << proc do
+              out[:relationships][rel_name] = content.map do |it|
                 object_reference_index.fetch( unique_key(it) ) do
                   deserialize_data(it, object_reference_index, ref_operations)
                 end
-              })
-            }
+              end
+            end
           when Hash
-            ref_operations << -> {
-              struct.__update(rel_name, object_reference_index.fetch(unique_key(content)){
-                deserialize_data(content, object_reference_index, ref_operations)
-              })
-            }
+            ref_operations << proc do
+              out[:relationships][rel_name] = \
+                object_reference_index.fetch(unique_key(content)) do
+                  deserialize_data(content, object_reference_index, ref_operations)
+                end
+            end
           when nil
-            # do nothing
+            out[:relationships][rel_name] = nil
           else
             __raise__ "relationship `#{rel_name}` type not expected: `#{rel_value.class.name}`"
           end

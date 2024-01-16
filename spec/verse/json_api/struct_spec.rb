@@ -1,5 +1,5 @@
-RSpec.describe Verse::JsonApi::ClosedStruct do
-  subject { Verse::JsonApi::ClosedStruct }
+RSpec.describe Verse::JsonApi::Struct do
+  subject { Verse::JsonApi::Struct }
 
   it "can be initialized with a hash" do
     struct = subject.new(name: "John", age: 30)
@@ -17,31 +17,41 @@ RSpec.describe Verse::JsonApi::ClosedStruct do
     expect(struct.name).to eq("John")
   end
 
-  it "can be updated" do
-    struct = subject.new(name: "John", age: 30)
-    struct.__update(:name, "Jane")
-    expect(struct.name).to eq("Jane")
-  end
-
   it "can be converted to a hash" do
     struct = subject.new(name: "John", age: 30)
-    expect(struct.to_h).to eq({name: "John", age: 30})
+    expect(struct.to_h).to eq(data: {name: "John", age: 30})
   end
 
   it "convert complex case in hash" do
     struct = subject.new(
-      name: "John",
-      age: 30,
-      addresses: [
-        subject.new(street: "123 Main St", city: "New York")
-      ]
+      id: 1,
+      type: "people",
+      attributes: {
+        name: "John",
+        age: 30,
+      },
+      relationships: {
+        addresses: [
+          subject.new( {attributes: { street: "123 Main St", city: "New York" }} )
+        ]
+      }
     )
-    expect(struct.to_h).to eq({name: "John", age: 30, addresses: [{street: "123 Main St", city: "New York"}]})
-  end
-
-  it "#each_pair" do
-    struct = subject.new(name: "John", age: 30)
-    expect(struct.each_pair.to_a).to eq([[:name, "John"], [:age, 30]])
+    expect(struct.to_h).to eq(
+      data: {
+        id: 1,
+        type: "people",
+        attributes: { name: "John", age: 30 },
+        relationships: {
+          addresses: {
+            data: [
+              attributes: {
+                street: "123 Main St", city: "New York"
+              }
+            ]
+          }
+        }
+      }
+    )
   end
 
   it "#hash" do

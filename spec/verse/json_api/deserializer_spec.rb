@@ -24,7 +24,7 @@ RSpec.describe Verse::JsonApi::Deserializer do
             # test with mono-object
             source: %<{"data":{"type":"articles","id":"3","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"}}}>,
             expected: -> (data, _) {
-              expect(data.class).to eq(Verse::JsonApi::ClosedStruct)
+              expect(data.class).to eq(Verse::JsonApi::Struct)
               expect(data.type).to eq("articles")
               expect(data.body).to eq("The shortest article. Ever.")
             }
@@ -32,7 +32,7 @@ RSpec.describe Verse::JsonApi::Deserializer do
             # test with non-included object
             source: %<{"data":{"type":"articles","id":"3","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"},"relationships":{"author":{"data":{"id":"42","type":"people"}}}}}>,
             expected: -> (data, _) {
-              expect(data.class).to eq(Verse::JsonApi::ClosedStruct)
+              expect(data.class).to eq(Verse::JsonApi::Struct)
               expect(data.type).to eq("articles")
               expect(data.body).to eq("The shortest article. Ever.")
 
