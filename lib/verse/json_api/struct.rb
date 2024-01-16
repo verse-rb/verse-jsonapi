@@ -24,8 +24,8 @@ module Verse
 
       attr_accessor :data, :meta, :errors
 
-      def is_model?
-        @data.is_a?(Hash) && @data[:attributes]
+      def model?
+        @data.is_a?(Hash) && @data[:attributes] || nil
       end
 
       def type
@@ -59,7 +59,7 @@ module Verse
           attributes[name]
         elsif relationships&.key?(name)
           relationships[name]
-        elsif data&.key?(name)
+        elsif data&.is_a?(Hash) && data.key?(name)
           data[name]
         else
           super
@@ -69,7 +69,7 @@ module Verse
       def to_h(root=true)
         x = \
           case
-          when is_model?
+          when model?
             {
               type: type,
               id: id,
@@ -99,22 +99,22 @@ module Verse
       end
 
       def attributes
-        @data&.[](:attributes)
+        (@data&.is_a?(Hash) && @data[:attributes]) || nil
       end
 
       def relationships
-        @data&.[](:relationships)
+        (@data&.is_a?(Hash) && @data[:relationships]) || nil
       end
 
       def respond_to_missing?(name, include_private = false)
         attributes&.key?(name) || relationships&.key?(name) || super
       end
 
-      def is_array?
+      def array?
         @data.is_a?(Array)
       end
 
-      def has_meta?
+      def meta?
         !!@meta
       end
 

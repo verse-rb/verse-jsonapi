@@ -8,9 +8,9 @@ module Verse
       extend self
 
 
-      # Transform a JSON:API formatted string to a ClosedStruct.
+      # Transform a JSON:API formatted string to a Struct.
       # @param input [String|Hash] a JSON:API formatted string or already parsed hash
-      # @return [Verse::ClosedStruct] a ClosedStruct with all the data
+      # @return [Verse::JsonApi::Struct] a Struct with all the data
       #
       # @note: Works only for structure with `data` key; documents with `meta` or `errors` key are not
       #       supported yet. Also, `link` keys are ignored for simplification.
@@ -34,7 +34,7 @@ module Verse
         out = \
           case data
           when Array
-            data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) }
+            Struct.new data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) }
           when Hash
             deserialize_data(data, object_reference_index, ref_operation_list)
           else
