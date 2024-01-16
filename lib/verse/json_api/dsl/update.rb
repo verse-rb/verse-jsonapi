@@ -29,7 +29,7 @@ module Verse
 
           body = @body || ->(value) {
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
-            send(dsl.parent.service).update(params[key_name], value)
+            send(dsl.parent.service).update(params[key_name], value.attributes)
           }
 
           @exposition_class.class_eval do

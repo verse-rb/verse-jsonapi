@@ -52,10 +52,7 @@ module Verse
       def deserialize_data(data, object_reference_index, ref_operations)
         out = data.slice(:id, :type)
 
-        data[:attributes]&.tap do |att|
-          out[:attributes] = att.merge(out)
-        end
-
+        out[:attributes] = data[:attributes].dup
         struct = Struct.new(out)
 
         # prepare the postprocessing pointers:
