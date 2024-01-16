@@ -14,7 +14,7 @@ module Verse
             when Array
               arr_to_h(elm)
             when Struct
-              elm.to_h
+              elm.to_h(false)
             else
               elm
             end
