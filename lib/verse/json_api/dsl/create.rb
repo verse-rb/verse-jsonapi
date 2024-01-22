@@ -54,7 +54,10 @@ module Verse
               next unless (field_name & dsl.ignored_fields).empty?
               next unless (config[:visible])
 
-              optional(field).value(type?: config.fetch(:type, Object))
+              type = config.fetch(:type)
+              type = Object unless config.is_a?(Class)
+
+              optional(field).value(type?: type)
             end
           end
 
