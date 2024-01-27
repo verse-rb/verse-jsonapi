@@ -40,7 +40,7 @@ module Verse
           when Array, Verse::Util::ArrayWithMetadata
             render_collection(object, self.field_set)
           when Exception
-            render_error(object)
+            render_error_object(object)
           else
             { data: object }
           end
@@ -50,11 +50,35 @@ module Verse
             output[:meta].merge!(meta)
           end
 
-          @pretty ? JSON.pretty_generate(output) : output.to_json
+          @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end
 
-      def render_error(error)
+      def render_error(error, ctx)
+        output = render_error_object(error)
+
+        @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
+      end
+
+      protected
+
+      def render_error_object(error)
+        output = \
         case error
+        when Verse::Error::ValidationFailed
+          {
+            errors: error.source.map do |key, values|
+              key = key.to_s
+
+              values.map do |value|
+                {
+                  status: 422,
+                  title: "Verse::Error::ValidationFailed",
+                  detail:  value,
+                  source: { pointer: "/#{key.gsub(".", "/")}" }
+                }
+              end
+            end.flatten
+          }
         when Verse::Error::Base
           {
             errors: [
@@ -62,9 +86,6 @@ module Verse
                 status: error.class.http_code.to_s,
                 title:  error.class.name,
                 detail: error.message,
-                meta:{
-                  backtrace: error.backtrace
-                }
               }
             ]
           }
@@ -75,16 +96,20 @@ module Verse
                 status: "500",
                 title: error.class.name,
                 detail:  error.message,
-                meta:{
-                  backtrace: error.backtrace
-                }
               }
-            ]
+            ],
           }
         end
-      end
 
-      protected
+
+        if Verse::Http::Plugin.show_error_details?
+          output[:meta] = {
+            backtrace: error.backtrace
+          }
+        end
+
+        output
+      end
 
       def render_collection(arr, field_set)
         return { data: arr } if arr.empty?

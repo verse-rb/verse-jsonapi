@@ -169,8 +169,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       get "/users?included[]=comments"
 
       expect(last_response.status).to eq(422)
-      expect(JSON.parse(last_response.body, symbolize_names: true)[:errors].first[:type]).to eq(
-        "validation_error"
+      puts last_response.body
+      expect(JSON.parse(last_response.body, symbolize_names: true)[:errors].first[:title]).to eq(
+        "Verse::Error::ValidationFailed"
       )
     end
 

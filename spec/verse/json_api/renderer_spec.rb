@@ -173,12 +173,12 @@ RSpec.describe Verse::JsonApi::Renderer do
             {
               status: "500",
               title: "Verse::Error::Base",
-              detail: "test",
-              meta: {
-                backtrace: nil
-              }
+              detail: "test"
             }
-          ]
+          ],
+          meta: {
+            backtrace: error.backtrace
+          }
         })
       end
     end
@@ -191,14 +191,14 @@ RSpec.describe Verse::JsonApi::Renderer do
         expect(JSON.parse(output, symbolize_names: true)).to eq({
           errors: [
             {
+              detail: "test",
               status: "500",
               title: "StandardError",
-              detail: "test",
-              meta: {
-                backtrace: nil
-              }
             }
-          ]
+          ],
+          meta: {
+            backtrace: error.backtrace
+          }
         })
       end
     end

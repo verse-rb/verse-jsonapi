@@ -52,29 +52,31 @@ module Verse
 
         def create_schema
           dsl = self
-          Dry::Schema.Params do
-            optional(:page).value(:integer).value(gt?: 0)
-            optional(:per_page).value(:integer).value(gt?: 0, lt?: dsl.max_items_per_pages + 1)
-            optional(:sort).value(:string)
-            optional(:count).value(:bool)
+          Verse::Schema.define do
+            field?(:page, Integer).rule("must be positive"){ |v| v > 0 }
+            field?(:per_page, Integer).rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v| v > 0 && v <= dsl.max_items_per_pages }
+            field?(:sort, String)
+            field?(:count, TrueClass)
 
-            optional(:filter).hash do
+            field?(:filter, Hash) do
               dsl.parent.resource_class.fields.each do |field|
                 next if dsl.blacklist_filters.include?(field[0])
-                optional(field[0]).value(type?: Object)
+                field?(field[0], Object)
               end
 
               dsl.allowed_filters.each do |field|
                 case field
                 when Proc
-                  field[1].call(optional(field[0].to_sym))
+                  field[1].call(field(field[0].to_sym))
                 when String, Symbol
-                  optional(field.to_sym).value(type?: Object)
+                  field?(field.to_sym, Object)
                 end
               end
             end
 
-            optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
+            field?(:included, Array, of: String).rule("must be one of `#{dsl.parent.allowed_included.join(",")}`") do |arr|
+              arr.all?{ |it| dsl.parent.allowed_included.include?(it) }
+            end
           end
         end
 

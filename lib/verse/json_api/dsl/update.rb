@@ -47,7 +47,7 @@ module Verse
         def create_schema
           dsl = self
 
-          schema = @schema || proc do
+          schema = @schema || Verse::Schema.define do
             dsl.parent.resource_class.fields.each do |field, config|
               field_name = [field.to_s, field.to_sym]
 
@@ -57,41 +57,53 @@ module Verse
               type = config.fetch(:type)
               type = Object unless config.is_a?(Class)
 
-              optional(field).value(type?: type)
+              field?(field, type)
             end
           end
 
-          relations = proc do
+          relations = Verse::Schema.define do
             dsl.parent.resource_class.relations.each do |field, config|
               next unless dsl.authorized_relationships.include?(field)
 
               if config.opts[:array]
-                required(field).array(:hash) do
-                  required(:id).filled(:string)
-                  required(:type).filled(:string)
-                  optional(:attributes).hash
+                field(field).array(:hash) do
+                  field(:id, String).filled
+                  field(:type, String).filled
+                  field?(:attributes, Hash)
+                  rule([:id, :attributes]) do |schema|
+                    if schema[:id].nil? ^ schema[:attributes].nil?
+                      schema.failure("must have both id and attributes or none")
+                    end
+                  end
                 end
               else
                 required(field).hash do
-                  required(:id).filled(:string)
-                  required(:type).filled(:string)
-                  optional(:attributes).hash
+                  field(:id, String).filled
+                  field(:type, String).filled
+                  field?(:attributes, Hash)
+
+                  rule([:id, :attributes]) do |schema|
+                    if schema[:id].nil? ^ schema[:attributes].nil?
+                      schema.failure("must have both id and attributes or none")
+                    end
+                  end
+
                 end
               end
            end
           end
 
-          Dry::Schema.Params do
+          Verse::Schema.define do
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
 
             raise "incorrect path for update: `#{path}`" unless key_name
 
-            dsl.parent.key_type.call(required(key_name))
+            dsl.parent.key_type.call(field(key_name))
 
-            required(:data).hash do
-              required(:type).value(:str?, included_in?: dsl.parent.resource_class.type)
-              required(:attributes).hash(&schema)
-              optional(:relationships).hash(&relations)
+            field(:data, Hash) do
+              field(:type, String).in?(dsl.parent.resource_class.type)
+              field(:attributes, schema)
+              field?(:relationships, relations)
             end
           end
         end

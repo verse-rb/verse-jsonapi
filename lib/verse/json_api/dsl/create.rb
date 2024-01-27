@@ -47,7 +47,7 @@ module Verse
         def create_schema
           dsl = self
 
-          schema = @schema || proc do
+          schema = @schema || Verse::Schema.define do
             dsl.parent.resource_class.fields.each do |field, config|
               field_name = [field.to_s, field.to_sym]
 
@@ -57,35 +57,33 @@ module Verse
               type = config.fetch(:type)
               type = Object unless config.is_a?(Class)
 
-              optional(field).value(type?: type)
+              field?(field, type)
             end
           end
 
-          relations = proc do
-            dsl.parent.resource_class.relations.each do |field, config|
-              next unless dsl.authorized_relationships.include?(field)
+          relations = Verse::Schema.define do
+            dsl.parent.resource_class.relations.each do |f, config|
+              next unless dsl.authorized_relationships.include?(f)
+
+              record = Verse::Schema.define do
+                field(:id, String).filled
+                field(:type, String).filled
+                field?(:attributes, Hash)
+              end
 
               if config.opts[:array]
-                required(field).array(:hash) do
-                  required(:id).filled(:string)
-                  required(:type).filled(:string)
-                  optional(:attributes).hash
-                end
+                field(f, Array, of: record)
               else
-                required(field).hash do
-                  required(:id).filled(:string)
-                  required(:type).filled(:string)
-                  optional(:attributes).hash
-                end
+                field(f, record)
               end
            end
           end
 
-          Dry::Schema.Params do
-            required(:data).hash do
-              required(:type).value(:str?, included_in?: dsl.parent.resource_class.type)
-              required(:attributes).hash(&schema)
-              optional(:relationships).hash(&relations)
+          Verse::Schema.define do
+            field(:data).hash do
+              field(:type, String).in?(dsl.parent.resource_class.type)
+              field(:attributes, schema)
+              field?(:relationships, relations)
             end
           end
         end

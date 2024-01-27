@@ -41,13 +41,13 @@ module Verse
 
         def create_schema
           dsl = self
-          Dry::Schema.Params do
+          Verse::Schema.define do
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
 
             raise "incorrect path for show: `#{path}`" unless key_name
 
-            dsl.parent.key_type.call(required(key_name))
-            optional(:included).array(:string, included_in?: dsl.parent.allowed_included)
+            dsl.parent.key_type.call(field(key_name, Object))
+            field?(:included, Array, of: String).rule("included unauthorized"){ |value| value.all?{ |v| dsl.parent.allowed_included.include?(v) }  }
           end
         end
 
