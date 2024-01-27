@@ -19,7 +19,7 @@ module Verse
 
         instruction :ignored_fields, []
 
-        instruction :authorized_relationships, []
+        instruction :authorized_relationships, {}
 
         instruction :body
         instruction :schema
@@ -28,7 +28,7 @@ module Verse
           dsl = self
 
           body = @body || ->(value) {
-            send(dsl.parent.service).create(value.attributes)
+            send(dsl.parent.service).create(value)
           }
 
           @exposition_class.class_eval do
@@ -37,9 +37,8 @@ module Verse
               input dsl.create_schema
             end
             define_method(:create) do
-              value = Verse::JsonApi::Deserializer.deserialize(params)
               server.response.status = 201
-              instance_exec(value, &body)
+              instance_exec(params, &body)
             end
           end
         end
@@ -62,13 +61,28 @@ module Verse
           end
 
           relations = Verse::Schema.define do
+            authorized_relationship_names = dsl.authorized_relationships
             dsl.parent.resource_class.relations.each do |f, config|
-              next unless dsl.authorized_relationships.include?(f)
+              relationship_options = dsl.authorized_relationships
+
+              next unless relationship_options
 
               record = Verse::Schema.define do
-                field(:id, String).filled
                 field(:type, String).filled
-                field?(:attributes, Hash)
+
+                if(relationship_options[:link])
+                  field(:id, String).filled
+                end
+
+                if(relationship_options[:create])
+                  field?(:attributes, Hash)
+                end
+
+                rule([:id, :attributes]) do |schema|
+                  if schema[:id].nil? ^ schema[:attributes].nil?
+                    schema.failure("must have both id and attributes or none")
+                  end
+                end
               end
 
               if config.opts[:array]
@@ -80,11 +94,13 @@ module Verse
           end
 
           Verse::Schema.define do
-            field(:data).hash do
+            field(:data, Hash) do
               field(:type, String).in?(dsl.parent.resource_class.type)
               field(:attributes, schema)
               field?(:relationships, relations)
             end
+
+            transform { |schema| Deserializer.deserialize(schema) }
           end
         end
 

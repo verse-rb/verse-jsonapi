@@ -105,6 +105,10 @@ module Verse
               field(:attributes, schema)
               field?(:relationships, relations)
             end
+
+            transform do |data|
+              Deserializer.deserialize(data)
+            end
           end
         end
 
