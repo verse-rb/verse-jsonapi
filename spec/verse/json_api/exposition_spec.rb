@@ -253,9 +253,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
   context "#update", as: :user do
     it "allows update" do
-      expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
-        expect(id).to eq(1)
-        expect(struct[:name]).to eq("John")
+      expect_any_instance_of(TestService).to receive(:update){ |obj, struct|
+        expect(struct.id).to eq(1)
+        expect(struct.name).to eq("John")
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
       patch "/users/1", {
@@ -278,10 +278,10 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "removes illegal fields" do
-      expect_any_instance_of(TestService).to receive(:update){ |obj, id, struct|
-        expect(id).to eq(1)
-        expect(struct[:name]).to eq("John")
-        expect(struct[:secret_field]).to eq(nil)
+      expect_any_instance_of(TestService).to receive(:update){ |obj, struct|
+        expect(struct.id).to eq(1)
+        expect(struct.attributes[:name]).to eq("John")
+        expect(struct.attributes[:secret_field]).to eq(nil)
       }.and_return(UserRecord.new({id: 1, name: "John"}))
 
       patch "/users/1", {

@@ -29,7 +29,7 @@ module Verse
 
           body = @body || ->(value) {
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
-            send(dsl.parent.service).update(params[key_name], value.attributes)
+            send(dsl.parent.service).update(value)
           }
 
           @exposition_class.class_eval do
@@ -38,8 +38,7 @@ module Verse
               input dsl.create_schema
             end
             define_method(:update) do
-              value = Verse::JsonApi::Deserializer.deserialize(params)
-              instance_exec(value, &body)
+              instance_exec(params, &body)
             end
           end
         end
@@ -106,8 +105,9 @@ module Verse
               field?(:relationships, relations)
             end
 
-            transform do |data|
-              Deserializer.deserialize(data)
+            transform do |schema|
+              schema[:data][:id] = schema[key_name]
+              Deserializer.deserialize(schema)
             end
           end
         end
