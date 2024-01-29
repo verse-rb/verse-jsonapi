@@ -50,7 +50,37 @@ module Verse
             record.attributes[value.opts[:foreign_key]] = linked_record.id
           end
 
+          # 2.0 create the record
           id = repo.create(record.attributes)
+
+          # 3.0 connect the has_many links:
+          repo.class.model_class.relations.each do |key, value|
+            next unless value.opts[:type] == :has_many
+
+            # 3.1) verify that the relation is tagged in the creation:
+            next unless record.relationships
+            next unless rel = record.relationships[key]
+
+            # 3.2) setup repo:
+            repo_class = value.opts[:repository]
+            linked_repo = repo_class.new(auth_context)
+
+            # 3.3) create or update the relation:
+            rel.each do |x|
+              is_new = rel.id.nil?
+
+              if is_new
+                # 3.3a) create the record:
+                attr = rel.attributes.merge(value.opts[:foreign_key] => id)
+                id = linked_repo.create(attr)
+              else
+                # 3.3b) update the record:
+
+
+              linked_repo.update!(rel.id, value.opts[:foreign_key] => id)
+            end
+          end
+
           repo.find(id)
         end
       end
@@ -69,4 +99,5 @@ module Verse
 
     end
   end
+end
 end

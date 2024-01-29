@@ -19,7 +19,7 @@ module Verse
 
         instruction :ignored_fields, []
 
-        instruction :authorized_relationships, []
+        instruction :authorized_relationships, {}
 
         instruction :body
         instruction :schema
@@ -61,34 +61,35 @@ module Verse
           end
 
           relations = Verse::Schema.define do
-            dsl.parent.resource_class.relations.each do |field, config|
-              next unless dsl.authorized_relationships.include?(field)
+            dsl.parent.resource_class.relations.each do |f, config|
+              relationship_options = dsl.authorized_relationships[f]
 
-              if config.opts[:array]
-                field(field).array(:hash) do
+              next unless relationship_options
+
+              record = Verse::Schema.define do
+                field(:type, String).filled
+
+                if(relationship_options.include?(:link))
                   field(:id, String).filled
-                  field(:type, String).filled
-                  field?(:attributes, Hash)
-                  rule([:id, :attributes]) do |schema|
-                    if schema[:id].nil? ^ schema[:attributes].nil?
-                      schema.failure("must have both id and attributes or none")
-                    end
-                  end
                 end
-              else
-                required(field).hash do
-                  field(:id, String).filled
-                  field(:type, String).filled
+
+                if(relationship_options.include?(:create))
                   field?(:attributes, Hash)
+                end
 
-                  rule([:id, :attributes]) do |schema|
-                    if schema[:id].nil? ^ schema[:attributes].nil?
-                      schema.failure("must have both id and attributes or none")
-                    end
+                rule([:id, :attributes]) do |schema|
+                  if schema[:id].nil? ^ schema[:attributes].nil?
+                    schema.failure("must have both id and attributes or none")
                   end
-
                 end
               end
+
+              if config.opts[:array]
+                field(f, Array, of: record)
+              else
+                field(f, record)
+              end
+
            end
           end
 

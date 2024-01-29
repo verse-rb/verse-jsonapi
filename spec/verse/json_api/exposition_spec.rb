@@ -166,13 +166,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "rejects if user request included resource not allowed" do
-      get "/users?included[]=comments"
+      silent do
+        get "/users?included[]=comments"
 
-      expect(last_response.status).to eq(422)
-      puts last_response.body
-      expect(JSON.parse(last_response.body, symbolize_names: true)[:errors].first[:title]).to eq(
-        "Verse::Error::ValidationFailed"
-      )
+        expect(last_response.status).to eq(422)
+        expect(JSON.parse(last_response.body, symbolize_names: true)[:errors].first[:title]).to eq(
+          "Verse::Error::ValidationFailed"
+        )
+      end
     end
 
     it "allows if user request included resource allowed" do
@@ -225,9 +226,11 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "disallow if included is not in the list" do
-      get "/users/1?included[]=comments"
+      silent do
+        get "/users/1?included[]=comments"
 
-      expect(last_response.status).to eq(422)
+        expect(last_response.status).to eq(422)
+      end
     end
 
     it "allow if included is in the list" do

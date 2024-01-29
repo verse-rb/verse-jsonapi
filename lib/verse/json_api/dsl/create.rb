@@ -63,18 +63,18 @@ module Verse
           relations = Verse::Schema.define do
             authorized_relationship_names = dsl.authorized_relationships
             dsl.parent.resource_class.relations.each do |f, config|
-              relationship_options = dsl.authorized_relationships
+              relationship_options = dsl.authorized_relationships[f]
 
               next unless relationship_options
 
               record = Verse::Schema.define do
                 field(:type, String).filled
 
-                if(relationship_options[:link])
+                if(relationship_options.include?(:link))
                   field(:id, String).filled
                 end
 
-                if(relationship_options[:create])
+                if(relationship_options.include?(:create))
                   field?(:attributes, Hash)
                 end
 

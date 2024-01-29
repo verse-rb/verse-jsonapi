@@ -32,4 +32,10 @@ module ServiceSpec
 
     include Verse::JsonApi::Service
   end
+
+  class TeamService < Verse::Service::Base
+    use_repo TeamRepository
+
+    include Verse::JsonApi::Service
+  end
 end
