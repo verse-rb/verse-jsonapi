@@ -72,6 +72,8 @@ module Verse
                   field[1].call(field(field[0].to_sym))
                 when String, Symbol
                   field?(field.to_sym, Object)
+                else
+                  raise ArgumentError, "invalid filter #{field.inspect}"
                 end
               end
             end
