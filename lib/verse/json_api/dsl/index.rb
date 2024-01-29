@@ -31,8 +31,8 @@ module Verse
             service.index(
               params.fetch(:filter, {}),
               included: params.fetch(:included, []),
-              page: params.fetch(:page, 1),
-              items_per_page: params.fetch(:per_page, dsl.max_items_per_pages),
+              page: params.fetch(:page, {}).fetch(:number, 1),
+              items_per_page: params.fetch(:page, {}).fetch(:size, dsl.max_items_per_pages),
               sort: params&.fetch(:sort, nil)&.split(","),
               query_count: params.fetch(:count, false)
             )
