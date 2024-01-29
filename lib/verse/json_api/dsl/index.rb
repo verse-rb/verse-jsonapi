@@ -53,8 +53,10 @@ module Verse
         def create_schema
           dsl = self
           Verse::Schema.define do
-            field?(:page, Integer).rule("must be positive"){ |v| v > 0 }
-            field?(:per_page, Integer).rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v| v > 0 && v <= dsl.max_items_per_pages }
+            field?(:page, Hash) do
+              field?(:number, Integer).default(1).rule("must be positive"){ |v| v > 0 }
+              field?(:size, Integer).default(dsl.max_items_per_pages).rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v| v > 0 && v <= dsl.max_items_per_pages }
+            end
             field?(:sort, String)
             field?(:count, TrueClass)
 
