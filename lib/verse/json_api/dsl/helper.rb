@@ -15,7 +15,7 @@ module Verse
         def instruction(name, default_value = nil)
           case default_value
           when Hash
-            define_method(name) do |*values|
+            define_method(name) do |**values|
               if values.any?
                 instance_variable_set("@#{name}", values)
                 self
