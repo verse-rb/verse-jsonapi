@@ -67,19 +67,19 @@ module Verse
               next unless relationship_options
 
               record = Verse::Schema.define do
-                field(:type, String).filled
+                field(:data, Hash) do
+                  field(:type, String).filled
 
-                if(relationship_options.include?(:link))
-                  field(:id, String).filled
-                end
+                  if(relationship_options.include?(:link))
+                    field?(:id, String)
+                  end
 
-                if(relationship_options.include?(:create))
-                  field?(:attributes, Hash)
-                end
+                  if(relationship_options.include?(:create))
+                    field?(:attributes, Hash)
+                  end
 
-                rule([:id, :attributes]) do |schema|
-                  if schema[:id].nil? ^ schema[:attributes].nil?
-                    schema.failure("must have both id and attributes or none")
+                  rule([:id, :attributes], "must have either id or attributes") do |schema|
+                    schema[:id].nil? ^ schema[:attributes].nil?
                   end
                 end
               end
@@ -89,8 +89,7 @@ module Verse
               else
                 field(f, record)
               end
-
-           end
+            end
           end
 
           Verse::Schema.define do
