@@ -63,11 +63,12 @@ module Verse
 
             # 3.2) setup repo:
             repo_class = value.opts[:repository]
+            repo_class = Util::Reflection.constantize(repo_class) if repo_class.is_a?(String)
             linked_repo = repo_class.new(auth_context)
 
             # 3.3) create or update the relation:
             rel.each do |x|
-              is_new = rel.id.nil?
+              is_new = x.id.nil?
 
               if is_new
                 # 3.3a) create the record:
