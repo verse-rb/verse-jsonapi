@@ -61,6 +61,8 @@ module Verse
           relationships[name]
         elsif data&.is_a?(Hash) && data.key?(name)
           data[name]
+        elsif args.empty?
+          nil
         else
           super
         end
