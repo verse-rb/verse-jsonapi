@@ -171,9 +171,7 @@ module Verse
 
       def render_attributes(record, field_set)
         record.class.fields.except(:id, :type).each_with_object({}) do |(field, key), h|
-          next h if !(
-            key[:visible] || field_set.include?(key[:visible])
-          )
+          next h unless key[:visible] && field_set.include?(key[:visible])
 
           value = record.send(field)
 
