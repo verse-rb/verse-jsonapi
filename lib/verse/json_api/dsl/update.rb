@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -28,7 +30,7 @@ module Verse
           dsl = self
 
           body = @body || ->(value) {
-            key_name = dsl.path[/:(\w+)/, 1]&.to_sym
+            dsl.path[/:(\w+)/, 1]&.to_sym
             send(dsl.parent.service).update(value)
           }
 
@@ -51,7 +53,7 @@ module Verse
               field_name = [field.to_s, field.to_sym]
 
               next unless (field_name & dsl.ignored_fields).empty?
-              next unless (config[:visible])
+              next unless config[:visible]
 
               type = config.fetch(:type)
               type = Object unless config.is_a?(Class)
@@ -70,11 +72,11 @@ module Verse
                 field(:data, Hash) do
                   field(:type, String).filled
 
-                  if(relationship_options.include?(:link))
+                  if relationship_options.include?(:link)
                     field?(:id, String)
                   end
 
-                  if(relationship_options.include?(:create))
+                  if relationship_options.include?(:create)
                     field?(:attributes, Hash)
                   end
 
@@ -111,7 +113,6 @@ module Verse
             end
           end
         end
-
       end
     end
   end

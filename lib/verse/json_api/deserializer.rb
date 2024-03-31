@@ -1,12 +1,12 @@
+# frozen_string_literal: true
+
 require_relative "./struct"
 require_relative "./bad_format_error"
 
 module Verse
   module JsonApi
     module Deserializer
-
       extend self
-
 
       # Transform a JSON:API formatted string to a Struct.
       # @param input [String|Hash] a JSON:API formatted string or already parsed hash
@@ -34,7 +34,7 @@ module Verse
         out = \
           case data
           when Array
-            Struct.new data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) }
+            Struct.new(data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) })
           when Hash
             deserialize_data(data, object_reference_index, ref_operation_list)
           else
@@ -87,13 +87,12 @@ module Verse
       end
 
       def unique_key(obj)
-        [obj.fetch(:type), obj.fetch(:id, '')]
+        [obj.fetch(:type), obj.fetch(:id, "")]
       end
 
       def __raise__(message)
         raise BadFormatError, message
       end
     end
-
   end
 end

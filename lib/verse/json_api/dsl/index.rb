@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -63,6 +65,7 @@ module Verse
             field?(:filter, Hash) do
               dsl.parent.resource_class.fields.each do |field|
                 next if dsl.blacklist_filters.include?(field[0])
+
                 field?(field[0], Object)
               end
 
@@ -83,7 +86,6 @@ module Verse
             end
           end
         end
-
       end
     end
   end

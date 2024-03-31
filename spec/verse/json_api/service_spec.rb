@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "./data/schema"
 
 RSpec.describe Verse::JsonApi::Service do
@@ -22,24 +24,24 @@ RSpec.describe Verse::JsonApi::Service do
     context "with belongs_to association" do
       it "creates a user with a new team" do
         user_data = Verse::JsonApi::Deserializer.deserialize({
-          data: {
-            type: "users",
-            attributes: {
-              first_name: "John",
-              last_name: "Doe"
-            },
-            relationships: {
-              team: {
-                data: {
-                  type: "teams",
-                  attributes: {
-                    name: "Team 1"
-                  }
-                }
-              }
-            }
-          }
-        })
+                                                               data: {
+                                                                 type: "users",
+                                                                 attributes: {
+                                                                   first_name: "John",
+                                                                   last_name: "Doe"
+                                                                 },
+                                                                 relationships: {
+                                                                   team: {
+                                                                     data: {
+                                                                       type: "teams",
+                                                                       attributes: {
+                                                                         name: "Team 1"
+                                                                       }
+                                                                     }
+                                                                   }
+                                                                 }
+                                                               }
+                                                             })
 
         user = subject.create(user_data)
 
@@ -62,22 +64,22 @@ RSpec.describe Verse::JsonApi::Service do
         ServiceSpec::TeamRepository.data = [team]
 
         user_data = Verse::JsonApi::Deserializer.deserialize({
-          data: {
-            type: "users",
-            attributes: {
-              first_name: "John",
-              last_name: "Doe"
-            },
-            relationships: {
-              team: {
-                data: {
-                  type: "teams",
-                  id: 1
-                }
-              }
-            }
-          }
-        })
+                                                               data: {
+                                                                 type: "users",
+                                                                 attributes: {
+                                                                   first_name: "John",
+                                                                   last_name: "Doe"
+                                                                 },
+                                                                 relationships: {
+                                                                   team: {
+                                                                     data: {
+                                                                       type: "teams",
+                                                                       id: 1
+                                                                     }
+                                                                   }
+                                                                 }
+                                                               }
+                                                             })
 
         subject.create(user_data)
 
@@ -95,33 +97,33 @@ RSpec.describe Verse::JsonApi::Service do
 
       it "creates a team with new users" do
         team_data = Verse::JsonApi::Deserializer.deserialize({
-          data: {
-            type: "teams",
-            attributes: {
-              name: "Team 1"
-            },
-            relationships: {
-              users: {
-                data: [
-                  {
-                    type: "users",
-                    attributes: {
-                      first_name: "John",
-                      last_name: "Doe"
-                    }
-                  },
-                  {
-                    type: "users",
-                    attributes: {
-                      first_name: "Jane",
-                      last_name: "Doe"
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        })
+                                                               data: {
+                                                                 type: "teams",
+                                                                 attributes: {
+                                                                   name: "Team 1"
+                                                                 },
+                                                                 relationships: {
+                                                                   users: {
+                                                                     data: [
+                                                                       {
+                                                                         type: "users",
+                                                                         attributes: {
+                                                                           first_name: "John",
+                                                                           last_name: "Doe"
+                                                                         }
+                                                                       },
+                                                                       {
+                                                                         type: "users",
+                                                                         attributes: {
+                                                                           first_name: "Jane",
+                                                                           last_name: "Doe"
+                                                                         }
+                                                                       }
+                                                                     ]
+                                                                   }
+                                                                 }
+                                                               }
+                                                             })
 
         team = subject.create(team_data)
 
@@ -146,9 +148,6 @@ RSpec.describe Verse::JsonApi::Service do
         expect(team.id).to_not be_nil
         expect(team.name).to eq("Team 1")
       end
-
     end
-
   end
-
 end

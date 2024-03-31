@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -52,7 +54,6 @@ module Verse
             dsl.parent.key_type.call(field(key_name))
           end
         end
-
       end
     end
   end

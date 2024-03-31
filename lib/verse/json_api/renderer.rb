@@ -30,30 +30,30 @@ module Verse
             included = gather_included(object)
 
             out = {}
-            out[:data] = render_record(object, self.field_set, false)
+            out[:data] = render_record(object, field_set, false)
 
             unless included.empty?
-              out[:included] = included.map{ |r| render_record(r, self.field_set, false) }
+              out[:included] = included.map{ |r| render_record(r, field_set, false) }
             end
 
             out
           when Array, Verse::Util::ArrayWithMetadata
-            render_collection(object, self.field_set)
+            render_collection(object, field_set)
           when Exception
             render_error_object(object)
           else
             { data: object }
           end
 
-          if meta
-            output[:meta] ||= {}
-            output[:meta].merge!(meta)
-          end
+        if meta
+          output[:meta] ||= {}
+          output[:meta].merge!(meta)
+        end
 
-          @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
+        @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end
 
-      def render_error(error, ctx)
+      def render_error(error, _ctx)
         output = render_error_object(error)
 
         @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
@@ -63,44 +63,43 @@ module Verse
 
       def render_error_object(error)
         output = \
-        case error
-        when Verse::Error::ValidationFailed
-          {
-            errors: error.source.map do |key, values|
-              key = key.to_s
+          case error
+          when Verse::Error::ValidationFailed
+            {
+              errors: error.source.map do |key, values|
+                key = key.to_s
 
-              values.map do |value|
+                values.map do |value|
+                  {
+                    status: 422,
+                    title: "Verse::Error::ValidationFailed",
+                    detail: value,
+                    source: { pointer: "/#{key.gsub(".", "/")}" }
+                  }
+                end
+              end.flatten
+            }
+          when Verse::Error::Base
+            {
+              errors: [
                 {
-                  status: 422,
-                  title: "Verse::Error::ValidationFailed",
-                  detail:  value,
-                  source: { pointer: "/#{key.gsub(".", "/")}" }
+                  status: error.class.http_code.to_s,
+                  title: error.class.name,
+                  detail: error.message,
                 }
-              end
-            end.flatten
-          }
-        when Verse::Error::Base
-          {
-            errors: [
-              {
-                status: error.class.http_code.to_s,
-                title:  error.class.name,
-                detail: error.message,
-              }
-            ]
-          }
-        else
-          {
-            errors: [
-              {
-                status: "500",
-                title: error.class.name,
-                detail:  error.message,
-              }
-            ],
-          }
-        end
-
+              ]
+            }
+          else
+            {
+              errors: [
+                {
+                  status: "500",
+                  title: error.class.name,
+                  detail: error.message,
+                }
+              ],
+            }
+          end
 
         if Verse::Http::Plugin.show_error_details?
           output[:meta] = {
@@ -133,6 +132,7 @@ module Verse
         if !root
           # Prevent circular references
           return include_set if include_set.include?(record)
+
           include_set.add(record)
         end
 
@@ -160,8 +160,6 @@ module Verse
         }
 
         unless link
-          binding.pry if record.class.name == "Model::InstanceRecord" && record.included.size>0
-
           out.merge!({
             attributes: render_attributes(record, field_set),
             relationships: render_relationships(record, field_set)
@@ -172,7 +170,7 @@ module Verse
       end
 
       def render_attributes(record, field_set)
-        record.class.fields.except(:id, :type).reduce({}) do |h, (field, key)|
+        record.class.fields.except(:id, :type).each_with_object({}) do |(field, key), h|
           next h if !(
             key[:visible] || field_set.include?(key[:visible])
           )
@@ -180,7 +178,6 @@ module Verse
           value = record.send(field)
 
           h[field] = value
-          h
         end
       end
 
@@ -191,27 +188,25 @@ module Verse
 
           next unless relations
 
-          if value.opts[:array]
-            if relations.nil?
-              relationships[key] = {data: []}
-            else
-              relationships[key] = {
-                data: relations.map { |r|
-                  render_record(r, field_set, true)
-                }
-              }
-            end
-          else
-            if relations.nil?
-              relationships[key] = {
-                data: nil
-              }
-            else
-              relationships[key] = {
-                data: render_record(relations, field_set, true)
-              }
-            end
-          end
+          relationships[key] = if value.opts[:array]
+                                 if relations.nil?
+                                   { data: [] }
+                                 else
+                                   {
+                                     data: relations.map { |r|
+                                       render_record(r, field_set, true)
+                                     }
+                                   }
+                                 end
+                               elsif relations.nil?
+                                 {
+                                   data: nil
+                                 }
+                               else
+                                 {
+                                   data: render_record(relations, field_set, true)
+                                 }
+                               end
         end
 
         relationships.empty? ? nil : relationships
@@ -220,7 +215,6 @@ module Verse
       def render_metadata(object)
         object.respond_to?(:metadata) ? object.metadata : nil
       end
-
     end
   end
 end

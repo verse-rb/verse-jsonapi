@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "bootsnap"
 Bootsnap.setup(cache_dir: "tmp/cache")
 
@@ -18,7 +19,6 @@ require "verse/spec"
 require "verse/http/spec"
 
 require "verse/json_api"
-
 
 def silent
   return unless (logger = Verse.logger)

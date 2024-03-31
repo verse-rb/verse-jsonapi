@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -47,10 +49,9 @@ module Verse
             raise "incorrect path for show: `#{path}`" unless key_name
 
             dsl.parent.key_type.call(field(key_name, Object))
-            field?(:included, Array, of: String).rule("included unauthorized"){ |value| value.all?{ |v| dsl.parent.allowed_included.include?(v) }  }
+            field?(:included, Array, of: String).rule("included unauthorized"){ |value| value.all?{ |v| dsl.parent.allowed_included.include?(v) } }
           end
         end
-
       end
     end
   end

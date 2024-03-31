@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -8,7 +10,7 @@ module Verse
 
         def build_path(*args)
           args.reject(&:empty?).map do |x|
-            x = (x != "/" && x[-1] == "/") ? x[0..-2] : x
+            x != "/" && x[-1] == "/" ? x[0..-2] : x
           end.join("/")
         end
 
@@ -43,8 +45,7 @@ module Verse
             end
           else
             define_method(name) do |value = NOTHING|
-              case
-              when value != NOTHING
+              if value != NOTHING
                 instance_variable_set("@#{name}", value)
                 self
               else
@@ -53,7 +54,6 @@ module Verse
             end
           end
         end
-
       end
     end
   end

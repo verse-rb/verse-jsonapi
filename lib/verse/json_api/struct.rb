@@ -1,4 +1,6 @@
-require 'forwardable'
+# frozen_string_literal: true
+
+require "forwardable"
 
 module Verse
   module JsonApi
@@ -47,19 +49,19 @@ module Verse
       def_delegators :@data, :[], :==, :hash
 
       def ==(other)
-        (other.class == self.class) && (other.to_h == self.to_h)
+        (other.class == self.class) && (other.to_h == to_h)
       end
 
       alias_method :eql?, :==
 
       def method_missing(name, *args, &block)
-        super if !(args.empty?) || block_given?
+        super if !args.empty? || block_given?
 
         if attributes&.key?(name)
           attributes[name]
         elsif relationships&.key?(name)
           relationships[name]
-        elsif data&.is_a?(Hash) && data.key?(name)
+        elsif data.is_a?(Hash) && data&.key?(name)
           data[name]
         elsif args.empty?
           nil
@@ -68,10 +70,9 @@ module Verse
         end
       end
 
-      def to_h(root=true)
+      def to_h(root = true)
         x = \
-          case
-          when model?
+          if model?
             {
               type: type,
               id: id,
@@ -86,7 +87,7 @@ module Verse
                 end
               }
             }.compact
-          when array?
+          elsif array?
             Helper.arr_to_h(@data)
           else
             @data
@@ -103,11 +104,11 @@ module Verse
       end
 
       def attributes
-        (@data&.is_a?(Hash) && @data[:attributes]) || nil
+        (@data.is_a?(Hash) && @data[:attributes]) || nil
       end
 
       def relationships
-        (@data&.is_a?(Hash) && @data[:relationships]) || nil
+        (@data.is_a?(Hash) && @data[:relationships]) || nil
       end
 
       def respond_to_missing?(name, include_private = false)
@@ -127,13 +128,11 @@ module Verse
         @meta = meta
         @errors = error
 
-        if block_given?
-          singleton_class = (class << self; self; end)
-          singleton_class.class_eval(&block)
-        end
-      end
+        return unless block_given?
 
+        singleton_class = (class << self; self; end)
+        singleton_class.class_eval(&block)
+      end
     end
   end
-
 end

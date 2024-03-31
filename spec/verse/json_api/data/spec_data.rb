@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UserRecord < Verse::Model::Record::Base
   field :id, primary: true, type: Integer
   field :name, type: String

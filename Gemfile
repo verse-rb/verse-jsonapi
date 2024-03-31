@@ -17,9 +17,9 @@ gem "bootsnap", "~> 1.16"
 gem "pry"
 gem "simplecov"
 
-gem "verse-schema", github: "verse-rb/verse-schema", branch: "master"
 gem "verse-core", github: "verse-rb/verse-core", branch: "master"
 gem "verse-http", github: "verse-rb/verse-http", branch: "master"
+gem "verse-schema", github: "verse-rb/verse-schema", branch: "master"
 
 gem "rake", "~> 13.0"
 

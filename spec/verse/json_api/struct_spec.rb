@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Verse::JsonApi::Struct do
   subject { Verse::JsonApi::Struct }
 
@@ -19,7 +21,7 @@ RSpec.describe Verse::JsonApi::Struct do
 
   it "can be converted to a hash" do
     struct = subject.new(name: "John", age: 30)
-    expect(struct.to_h).to eq(data: {name: "John", age: 30})
+    expect(struct.to_h).to eq(data: { name: "John", age: 30 })
   end
 
   it "convert complex case in hash" do
@@ -32,7 +34,7 @@ RSpec.describe Verse::JsonApi::Struct do
       },
       relationships: {
         addresses: [
-          subject.new( {attributes: { street: "123 Main St", city: "New York" }} )
+          subject.new( { attributes: { street: "123 Main St", city: "New York" } } )
         ]
       }
     )
@@ -56,12 +58,11 @@ RSpec.describe Verse::JsonApi::Struct do
 
   it "#hash" do
     struct = subject.new(name: "John", age: 30)
-    expect(struct.hash).to eq({name: "John", age: 30}.hash)
+    expect(struct.hash).to eq({ name: "John", age: 30 }.hash)
   end
 
   it "#==" do
     struct = subject.new(name: "John", age: 30)
     expect(struct).to eq(subject.new(name: "John", age: 30))
   end
-
 end

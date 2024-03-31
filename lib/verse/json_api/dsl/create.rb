@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Dsl
@@ -51,7 +53,7 @@ module Verse
               field_name = [field.to_s, field.to_sym]
 
               next unless (field_name & dsl.ignored_fields).empty?
-              next unless (config[:visible])
+              next unless config[:visible]
 
               type = config.fetch(:type)
               type = Object unless config.is_a?(Class)
@@ -61,7 +63,7 @@ module Verse
           end
 
           relations = Verse::Schema.define do
-            authorized_relationship_names = dsl.authorized_relationships
+            dsl.authorized_relationships
             dsl.parent.resource_class.relations.each do |f, config|
               relationship_options = dsl.authorized_relationships[f]
 
@@ -71,11 +73,11 @@ module Verse
                 field(:data, Hash) do
                   field(:type, String).filled
 
-                  if(relationship_options.include?(:link))
+                  if relationship_options.include?(:link)
                     field?(:id, String)
                   end
 
-                  if(relationship_options.include?(:create))
+                  if relationship_options.include?(:create)
                     field?(:attributes, Hash)
                   end
 
@@ -103,7 +105,6 @@ module Verse
             transform { |schema| Deserializer.deserialize(schema) }
           end
         end
-
       end
     end
   end

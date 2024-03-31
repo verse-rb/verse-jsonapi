@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ServiceSpec
   class TeamRecord < Verse::Model::Record::Base
     field :id, primary: true

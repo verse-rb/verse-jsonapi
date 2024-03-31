@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require_relative "data/spec_data"
 
@@ -20,10 +22,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
   context "#create" do
     it "allows creation with good input", as: :user do
-
-      expect_any_instance_of(TestService).to receive(:create){ |obj, attr|
+      expect_any_instance_of(TestService).to receive(:create){ |_obj, attr|
         expect(attr.name).to eq("John")
-      }.and_return(UserRecord.new({id: 1, name: "John"}))
+      }.and_return(UserRecord.new({ id: 1, name: "John" }))
 
       post "/users", {
         data: {
@@ -43,13 +44,11 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         }
       )
     end
-
   end
 
   context "#delete" do
     it "allows deletion with good input", as: :user do
-
-      expect_any_instance_of(TestService).to receive(:delete){ |obj, id|
+      expect_any_instance_of(TestService).to receive(:delete){ |_obj, id|
         expect(id).to eq(1)
       }
 
@@ -57,19 +56,18 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
       expect(last_response.status).to eq(204)
     end
-
   end
 
   context "#index", as: :user do
     it "allows index" do
-      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
         expect(filters).to eq({})
         expect(included).to eq([])
         expect(page).to eq(1)
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({id: 1, name: "John"})])
+      }.and_return([UserRecord.new({ id: 1, name: "John" })])
 
       get "/users"
 
@@ -88,14 +86,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "allows index with filters" do
-      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
-        expect(filters).to eq({name: "John"})
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({ name: "John" })
         expect(included).to eq([])
         expect(page).to eq(1)
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({id: 1, name: "John"})])
+      }.and_return([UserRecord.new({ id: 1, name: "John" })])
 
       get "/users?filter[name]=John"
 
@@ -114,14 +112,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "filters out unallowed filters" do
-      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
         expect(filters).to eq({})
         expect(included).to eq([])
         expect(page).to eq(1)
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({id: 1, name: "John"})])
+      }.and_return([UserRecord.new({ id: 1, name: "John" })])
 
       get "/users?filter[unallowed]=John"
 
@@ -140,14 +138,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "allows filter declared in allowed_filters" do
-      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
-        expect(filters).to eq({name__match: "John"})
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({ name__match: "John" })
         expect(included).to eq([])
         expect(page).to eq(1)
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({id: 1, name: "John"})])
+      }.and_return([UserRecord.new({ id: 1, name: "John" })])
 
       get "/users?filter[name__match]=John"
 
@@ -177,14 +175,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "allows if user request included resource allowed" do
-      expect_any_instance_of(TestService).to receive(:index){ |obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
         expect(filters).to eq({})
         expect(included).to eq(["posts"])
         expect(page).to eq(1)
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({id: 1, name: "John"})])
+      }.and_return([UserRecord.new({ id: 1, name: "John" })])
 
       get "/users?included[]=posts"
 
@@ -201,15 +199,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         }
       )
     end
-
   end
 
   context "#show", as: :user do
     it "allows show" do
-      expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
+      expect_any_instance_of(TestService).to receive(:show){ |_obj, id, included:|
         expect(id).to eq(1)
         expect(included).to eq([])
-      }.and_return(UserRecord.new({id: 1, name: "John"}))
+      }.and_return(UserRecord.new({ id: 1, name: "John" }))
 
       get "/users/1"
 
@@ -234,10 +231,10 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "allow if included is in the list" do
-      expect_any_instance_of(TestService).to receive(:show){ |obj, id, included:|
+      expect_any_instance_of(TestService).to receive(:show){ |_obj, id, included:|
         expect(id).to eq(1)
         expect(included).to eq(["posts"])
-      }.and_return(UserRecord.new({id: 1, name: "John"}))
+      }.and_return(UserRecord.new({ id: 1, name: "John" }))
 
       get "/users/1?included[]=posts"
 
@@ -256,10 +253,10 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
   context "#update", as: :user do
     it "allows update" do
-      expect_any_instance_of(TestService).to receive(:update){ |obj, struct|
+      expect_any_instance_of(TestService).to receive(:update){ |_obj, struct|
         expect(struct.id).to eq(1)
         expect(struct.name).to eq("John")
-      }.and_return(UserRecord.new({id: 1, name: "John"}))
+      }.and_return(UserRecord.new({ id: 1, name: "John" }))
 
       patch "/users/1", {
         data: {
@@ -281,11 +278,11 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     end
 
     it "removes illegal fields" do
-      expect_any_instance_of(TestService).to receive(:update){ |obj, struct|
+      expect_any_instance_of(TestService).to receive(:update){ |_obj, struct|
         expect(struct.id).to eq(1)
         expect(struct.attributes[:name]).to eq("John")
         expect(struct.attributes[:secret_field]).to eq(nil)
-      }.and_return(UserRecord.new({id: 1, name: "John"}))
+      }.and_return(UserRecord.new({ id: 1, name: "John" }))
 
       patch "/users/1", {
         data: {

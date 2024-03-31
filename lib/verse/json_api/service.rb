@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Service
-
       def index(filter, included: [], page: 1, items_per_page: 1000, sort: nil, query_count: false)
         repo.index(
           filter,
@@ -15,7 +16,7 @@ module Verse
 
       def create(record)
         repo.transaction do
-          attributes = record.attributes
+          record.attributes
 
           # 1) setup the belongs to links:
           repo.class.model_class.relations.each do |key, value|
@@ -78,7 +79,6 @@ module Verse
                 # 3.3b) update the record:
               end
 
-
               linked_repo.update!(rel.id, value.opts[:foreign_key] => id)
             end
           end
@@ -87,18 +87,17 @@ module Verse
         end
       end
 
-      def update(record)
+      def update(_record)
         raise "not implemented"
       end
 
-      def delete(id)
+      def delete(_id)
         raise "not implemented"
       end
 
       def show(id, included: [])
         repo.find!(id, included: included)
       end
-
     end
   end
 end
