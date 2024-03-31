@@ -14,8 +14,10 @@ require "bundler"
 
 Bundler.require
 
-require "verse/json_api"
+require "verse/spec"
 require "verse/http/spec"
+
+require "verse/json_api"
 
 
 def silent
@@ -34,10 +36,10 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = ".rspec_status"
 
   # Add user fixture
-  Verse::Http::Spec::HttpHelper.add_user("user", :user)
+  Verse::Spec.add_user("user", :user)
 
   # set a dummy role for testing
-  Verse::Auth::Context[:user] = %w[
+  Verse::Auth::Context.backend[:user] = %w[
     users.read.*
     users.write.*
     verse-http:foo.*.*

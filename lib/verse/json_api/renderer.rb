@@ -160,6 +160,8 @@ module Verse
         }
 
         unless link
+          binding.pry if record.class.name == "Model::InstanceRecord" && record.included.size>0
+
           out.merge!({
             attributes: render_attributes(record, field_set),
             relationships: render_relationships(record, field_set)
@@ -184,7 +186,7 @@ module Verse
 
       def render_relationships(record, field_set)
         relationships = {}
-        record.class.relations.slice(*record.included).each do |key, value|
+        record.class.relations.slice(*record.local_included.map(&:to_sym)).each do |key, value|
           relations = record.send(key)
 
           next unless relations
