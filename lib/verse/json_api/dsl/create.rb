@@ -102,7 +102,9 @@ module Verse
               field?(:relationships, relations)
             end
 
-            transform { |schema| Deserializer.deserialize(schema) }
+            transform { |schema|
+              Deserializer.deserialize(schema)
+            }
           end
         end
       end

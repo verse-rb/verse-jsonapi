@@ -111,7 +111,7 @@ module Verse
       end
 
       def render_collection(arr, field_set)
-        return { data: arr } if arr.empty?
+        return { data: [], meta: render_metadata(arr) } if arr.empty?
 
         included = Set.new
         arr.each do |item|

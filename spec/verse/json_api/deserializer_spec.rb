@@ -50,6 +50,12 @@ RSpec.describe Verse::JsonApi::Deserializer do
               # check that attributes are valid.
               expect(first.type).to eq("articles")
             }
+          },
+          {
+            source: %<{"data":{"type":"falseclass","attributes":{"active":false}}}>,
+            expected: ->(data, _) {
+              expect(data.active).to eq(false)
+            }
           }
         ]
       }

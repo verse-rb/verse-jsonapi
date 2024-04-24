@@ -17,13 +17,15 @@ RSpec.describe Verse::JsonApi::Renderer do
       model = UserRecord.new({ id: 1, name: "John" })
 
       output = subject.render(model, ctx)
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: {
-                                                                  type: "users",
-                                                                  id: "1",
-                                                                  attributes: { name: "John" },
-                                                                }
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: {
+            type: "users",
+            id: "1",
+            attributes: { name: "John" },
+          }
+        }
+      )
     end
 
     it "renders a model with included models" do
@@ -44,46 +46,48 @@ RSpec.describe Verse::JsonApi::Renderer do
 
       output = subject.render(model, ctx)
 
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: {
-                                                                  type: "users",
-                                                                  id: "1",
-                                                                  attributes: { name: "John" },
-                                                                  relationships: {
-                                                                    posts: { data: [
-                                                                      { type: "posts", id: "1" },
-                                                                      { type: "posts", id: "2" },
-                                                                      { type: "posts", id: "3" }
-                                                                    ] },
-                                                                  }
-                                                                },
-                                                                included: [
-                                                                  {
-                                                                    type: "posts",
-                                                                    id: "1",
-                                                                    attributes: {
-                                                                      title: "Post 1",
-                                                                      content: "Lorem"
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    type: "posts",
-                                                                    id: "2",
-                                                                    attributes: {
-                                                                      title: "Post 2",
-                                                                      content: "Ipsum"
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    type: "posts",
-                                                                    id: "3",
-                                                                    attributes: {
-                                                                      title: "Post 3",
-                                                                      content: "Si dolorem"
-                                                                    }
-                                                                  }
-                                                                ]
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: {
+            type: "users",
+            id: "1",
+            attributes: { name: "John" },
+            relationships: {
+              posts: { data: [
+                { type: "posts", id: "1" },
+                { type: "posts", id: "2" },
+                { type: "posts", id: "3" }
+              ] },
+            }
+          },
+          included: [
+            {
+              type: "posts",
+              id: "1",
+              attributes: {
+                title: "Post 1",
+                content: "Lorem"
+              }
+            },
+            {
+              type: "posts",
+              id: "2",
+              attributes: {
+                title: "Post 2",
+                content: "Ipsum"
+              }
+            },
+            {
+              type: "posts",
+              id: "3",
+              attributes: {
+                title: "Post 3",
+                content: "Si dolorem"
+              }
+            }
+          ]
+        }
+      )
     end
 
     it "renders a collection" do
@@ -93,55 +97,75 @@ RSpec.describe Verse::JsonApi::Renderer do
       ]
 
       output = subject.render(collection, ctx)
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: [
-                                                                  {
-                                                                    type: "users",
-                                                                    id: "1",
-                                                                    attributes: { name: "John" }
-                                                                  },
-                                                                  {
-                                                                    type: "users",
-                                                                    id: "2",
-                                                                    attributes: { name: "Jane" }
-                                                                  }
-                                                                ]
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              type: "users",
+              id: "1",
+              attributes: { name: "John" }
+            },
+            {
+              type: "users",
+              id: "2",
+              attributes: { name: "Jane" }
+            }
+          ]
+        }
+      )
+    end
+
+    it "renders an empty collection (array with metadata)" do
+      collection = Verse::Util::ArrayWithMetadata.new([])
+
+      output = subject.render(collection, ctx)
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: [],
+          meta: {}
+        }
+      )
     end
 
     it "renders a collection (array with metadata)" do
-      collection = Verse::Util::ArrayWithMetadata.new([
-                                                        UserRecord.new({ id: 1, name: "John" }),
-                                                        UserRecord.new({ id: 2, name: "Jane" })
-                                                      ], metadata: { total: 2 })
+      collection = Verse::Util::ArrayWithMetadata.new(
+        [
+          UserRecord.new({ id: 1, name: "John" }),
+          UserRecord.new({ id: 2, name: "Jane" })
+        ], metadata: { total: 2 }
+      )
 
       output = subject.render(collection, ctx)
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: [
-                                                                  {
-                                                                    type: "users",
-                                                                    id: "1",
-                                                                    attributes: { name: "John" },
-                                                                  },
-                                                                  {
-                                                                    type: "users",
-                                                                    id: "2",
-                                                                    attributes: { name: "Jane" },
-                                                                  }
-                                                                ],
-                                                                meta: { total: 2 }
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              type: "users",
+              id: "1",
+              attributes: { name: "John" },
+            },
+            {
+              type: "users",
+              id: "2",
+              attributes: { name: "Jane" },
+            }
+          ],
+          meta: { total: 2 }
+        }
+      )
     end
   end
 
   context "render custom object" do
     it "renders a hash" do
       output = subject.render({ test: "test" }, ctx)
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: {
-                                                                  test: "test"
-                                                                }
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: {
+            test: "test"
+          }
+        }
+      )
     end
   end
 
@@ -150,15 +174,17 @@ RSpec.describe Verse::JsonApi::Renderer do
       model = CategoryRecord.new({ name: "test" })
 
       output = subject.render(model, ctx)
-      expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                data: {
-                                                                  type: "categories",
-                                                                  id: "test",
-                                                                  attributes: {
-                                                                    name: "test"
-                                                                  }
-                                                                }
-                                                              })
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: {
+            type: "categories",
+            id: "test",
+            attributes: {
+              name: "test"
+            }
+          }
+        }
+      )
     end
   end
 
@@ -168,18 +194,20 @@ RSpec.describe Verse::JsonApi::Renderer do
         error = Verse::Error::Base.new("test")
 
         output = subject.render(error, ctx)
-        expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                  errors: [
-                                                                    {
-                                                                      status: "500",
-                                                                      title: "Verse::Error::Base",
-                                                                      detail: "test"
-                                                                    }
-                                                                  ],
-                                                                  meta: {
-                                                                    backtrace: error.backtrace
-                                                                  }
-                                                                })
+        expect(JSON.parse(output, symbolize_names: true)).to eq(
+          {
+            errors: [
+              {
+                status: "500",
+                title: "Verse::Error::Base",
+                detail: "test"
+              }
+            ],
+            meta: {
+              backtrace: error.backtrace
+            }
+          }
+        )
       end
     end
 
@@ -188,18 +216,20 @@ RSpec.describe Verse::JsonApi::Renderer do
         error = StandardError.new("test")
 
         output = subject.render(error, ctx)
-        expect(JSON.parse(output, symbolize_names: true)).to eq({
-                                                                  errors: [
-                                                                    {
-                                                                      detail: "test",
-                                                                      status: "500",
-                                                                      title: "StandardError",
-                                                                    }
-                                                                  ],
-                                                                  meta: {
-                                                                    backtrace: error.backtrace
-                                                                  }
-                                                                })
+        expect(JSON.parse(output, symbolize_names: true)).to eq(
+          {
+            errors: [
+              {
+                detail: "test",
+                status: "500",
+                title: "StandardError",
+              }
+            ],
+            meta: {
+              backtrace: error.backtrace
+            }
+          }
+        )
       end
     end
   end
