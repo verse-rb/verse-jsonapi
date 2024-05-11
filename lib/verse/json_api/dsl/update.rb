@@ -80,8 +80,8 @@ module Verse
                     field?(:attributes, Hash)
                   end
 
-                  rule([:id, :attributes], "must have either id or attributes") do |schema|
-                    schema[:id].nil? ^ schema[:attributes].nil?
+                  rule([:id, :attributes], "must have either id or attributes") do |hash|
+                    hash[:id].nil? ^ hash[:attributes].nil?
                   end
                 end
               end
@@ -107,9 +107,9 @@ module Verse
               field?(:relationships, relations)
             end
 
-            transform do |schema|
-              schema[:data][:id] = schema[key_name]
-              Deserializer.deserialize(schema)
+            transform do |hash|
+              hash[:data][:id] = hash[key_name]
+              Deserializer.deserialize(hash)
             end
           end
         end

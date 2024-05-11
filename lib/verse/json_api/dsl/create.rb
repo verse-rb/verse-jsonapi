@@ -81,8 +81,8 @@ module Verse
                     field?(:attributes, Hash)
                   end
 
-                  rule([:id, :attributes], "must have either id or attributes") do |schema|
-                    schema[:id].nil? ^ schema[:attributes].nil?
+                  rule([:id, :attributes], "must have either id or attributes") do |hash|
+                    hash[:id].nil? ^ hash[:attributes].nil?
                   end
                 end
               end
@@ -102,9 +102,7 @@ module Verse
               field?(:relationships, relations)
             end
 
-            transform { |schema|
-              Deserializer.deserialize(schema)
-            }
+            transform(&Deserializer.method(:deserialize))
           end
         end
       end

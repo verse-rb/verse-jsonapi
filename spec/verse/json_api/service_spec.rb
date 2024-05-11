@@ -96,34 +96,36 @@ RSpec.describe Verse::JsonApi::Service do
       subject { ServiceSpec::TeamService.new(Verse::Auth::Context[user_context]) }
 
       it "creates a team with new users" do
-        team_data = Verse::JsonApi::Deserializer.deserialize({
-                                                               data: {
-                                                                 type: "teams",
-                                                                 attributes: {
-                                                                   name: "Team 1"
-                                                                 },
-                                                                 relationships: {
-                                                                   users: {
-                                                                     data: [
-                                                                       {
-                                                                         type: "users",
-                                                                         attributes: {
-                                                                           first_name: "John",
-                                                                           last_name: "Doe"
-                                                                         }
-                                                                       },
-                                                                       {
-                                                                         type: "users",
-                                                                         attributes: {
-                                                                           first_name: "Jane",
-                                                                           last_name: "Doe"
-                                                                         }
-                                                                       }
-                                                                     ]
-                                                                   }
-                                                                 }
-                                                               }
-                                                             })
+        team_data = Verse::JsonApi::Deserializer.deserialize(
+          {
+            data: {
+              type: "teams",
+              attributes: {
+                name: "Team 1"
+              },
+              relationships: {
+                users: {
+                  data: [
+                    {
+                      type: "users",
+                      attributes: {
+                        first_name: "John",
+                        last_name: "Doe"
+                      }
+                    },
+                    {
+                      type: "users",
+                      attributes: {
+                        first_name: "Jane",
+                        last_name: "Doe"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        )
 
         team = subject.create(team_data)
 

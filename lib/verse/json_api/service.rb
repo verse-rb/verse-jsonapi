@@ -77,6 +77,8 @@ module Verse
                 id = linked_repo.create(attr)
               else
                 # 3.3b) update the record:
+                puts "update the record"
+                raise "TODO"
               end
 
               linked_repo.update!(rel.id, value.opts[:foreign_key] => id)

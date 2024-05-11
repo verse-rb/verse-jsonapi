@@ -15,6 +15,7 @@ module Verse
       def render(object, ctx)
         ctx.content_type(ctx.content_type || "application/vnd.api+json")
 
+        # rubocop:disable Style/EmptyElse
         case object
         when Verse::Error::Base
           ctx.status object.class.http_code
@@ -23,6 +24,7 @@ module Verse
         else
           # keep status as-is
         end
+        # rubocop:enable Style/EmptyElse
 
         output = \
           case object
