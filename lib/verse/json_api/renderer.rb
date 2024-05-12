@@ -67,20 +67,32 @@ module Verse
         output = \
           case error
           when Verse::Error::ValidationFailed
-            {
-              errors: error.source.map do |key, values|
-                key = key.to_s
+            if error.source
+              {
+                errors: error.source.map do |key, values|
+                  key = key.to_s
 
-                values.map do |value|
+                  values.map do |value|
+                    {
+                      status: 422,
+                      title: "Verse::Error::ValidationFailed",
+                      detail: value,
+                      source: { pointer: "/#{key.gsub(".", "/")}" }
+                    }
+                  end
+                end.flatten
+              }
+            else
+              {
+                errors: [
                   {
                     status: 422,
                     title: "Verse::Error::ValidationFailed",
-                    detail: value,
-                    source: { pointer: "/#{key.gsub(".", "/")}" }
+                    detail: error.message
                   }
-                end
-              end.flatten
-            }
+                ]
+              }
+            end
           when Verse::Error::Base
             {
               errors: [
