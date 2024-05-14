@@ -102,7 +102,7 @@ module Verse
               field?(:relationships, relations)
             end
 
-            transform(&Deserializer.method(:deserialize))
+            transform{ |hash| Deserializer.deserialize(hash) }
           end
         end
       end

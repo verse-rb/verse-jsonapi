@@ -71,6 +71,8 @@ module Verse
             end
           when Hash
             ref_operations << proc do
+              binding.pry unless object_reference_index.respond_to?(:fetch)
+
               out[:relationships][rel_name] = \
                 object_reference_index.fetch(unique_key(content)) do
                   deserialize_data(content, object_reference_index, ref_operations)
