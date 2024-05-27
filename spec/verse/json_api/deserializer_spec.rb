@@ -70,6 +70,12 @@ RSpec.describe Verse::JsonApi::Deserializer do
         end
       end
 
+      it "idempotence" do
+        example =  %<{"data":{"type":"falseclass","attributes":{"active":false}}}>
+
+        expect(subject.deserialize(example)).to eq(subject.deserialize(subject.deserialize(example)))
+      end
+
       it "raises error on bad format" do
         example = { a: 1, b: 2 }.to_json
         expect{ subject.deserialize(example) }.to raise_error(Verse::JsonApi::BadFormatError)

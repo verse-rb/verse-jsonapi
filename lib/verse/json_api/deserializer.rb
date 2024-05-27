@@ -15,6 +15,7 @@ module Verse
       # @note: Works only for structure with `data` key; documents with `meta` or `errors` key are not
       #       supported yet. Also, `link` keys are ignored for simplification.
       def deserialize(input, object_reference_index = {})
+        return input if input.is_a?(Struct) # Idempotence
         return deserialize(JSON.parse(input, symbolize_names: true), object_reference_index) if input.is_a?(String)
 
         if input[:errors]
@@ -71,8 +72,6 @@ module Verse
             end
           when Hash
             ref_operations << proc do
-              binding.pry unless object_reference_index.respond_to?(:fetch)
-
               out[:relationships][rel_name] = \
                 object_reference_index.fetch(unique_key(content)) do
                   deserialize_data(content, object_reference_index, ref_operations)
