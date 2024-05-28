@@ -76,6 +76,12 @@ RSpec.describe Verse::JsonApi::Deserializer do
         expect(subject.deserialize(example)).to eq(subject.deserialize(subject.deserialize(example)))
       end
 
+      it "metadata" do
+        example =  %<{"data":{"type":"falseclass","attributes":{"active":false}}, "meta": {"a": 1, "b": true}}>
+        output = subject.deserialize(example)
+        expect(output.meta).to eq({ a: 1, b: true })
+      end
+
       it "raises error on bad format" do
         example = { a: 1, b: 2 }.to_json
         expect{ subject.deserialize(example) }.to raise_error(Verse::JsonApi::BadFormatError)

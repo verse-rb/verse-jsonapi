@@ -35,9 +35,19 @@ module Verse
         out = \
           case data
           when Array
-            Struct.new(data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) })
+            Struct.new(
+              data.map{ |it| deserialize_data(it, object_reference_index, ref_operation_list) },
+              nil,
+              input[:meta]
+            )
           when Hash
-            deserialize_data(data, object_reference_index, ref_operation_list)
+            out = deserialize_data(data, object_reference_index, ref_operation_list)
+
+            if input[:meta]
+              out.meta = input[:meta].merge(out.meta || {})
+            end
+
+            out
           else
             __raise__ "bad JSON:API format. Data must be of type Array|Hash, but `#{data.class.name}` is given"
           end
@@ -54,7 +64,7 @@ module Verse
         out = data.slice(:id, :type)
 
         out[:attributes] = data[:attributes].dup
-        struct = Struct.new(out)
+        struct = Struct.new(out, nil, data[:meta])
 
         # prepare the postprocessing pointers:
         data[:relationships]&.each do |rel_name, rel_value|
