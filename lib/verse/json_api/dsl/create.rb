@@ -56,7 +56,6 @@ module Verse
               next unless config[:visible]
 
               type = config.fetch(:type, Object)
-              type = Object unless type.is_a?(Class)
 
               field?(field, type)
             end
