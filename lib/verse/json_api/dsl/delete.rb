@@ -51,7 +51,11 @@ module Verse
 
           dsl = self
           Verse::Schema.define do
-            dsl.parent.key_type.call(field(key_name))
+            resource_class = dsl.parent.resource_class
+            pkey = resource_class.primary_key
+            type = resource_class.fields[pkey].fetch(:type, Object)
+
+            field(key_name, type)
           end
         end
       end

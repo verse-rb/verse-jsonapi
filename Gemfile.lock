@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:verse-rb/verse-core.git
-  revision: c3dec8a954d5ed21ef2945a1dd5259ae73377e5c
+  revision: 6b7edcfb614fdbeb5865daa6373dbbe5fa3e579d
   branch: master
   specs:
     verse-core (2.0.0)
@@ -10,7 +10,7 @@ GIT
 
 GIT
   remote: git@github.com:verse-rb/verse-http.git
-  revision: c1da4ee729a763c6b87d25dac2b6d65f0b389951
+  revision: 1eb0d81ab7d4308fcfbfb254c28382699641e0d1
   branch: master
   specs:
     verse-http (0.1.0)
@@ -19,7 +19,7 @@ GIT
 
 GIT
   remote: git@github.com:verse-rb/verse-schema.git
-  revision: 86c37917b6b1bc9eb5c337cbd2e0eab3476f505a
+  revision: 93677df7d86c209f60f280a4db51dfa1a9ea9e36
   branch: master
   specs:
     verse-schema (0.1.0)
@@ -37,7 +37,7 @@ GEM
     bootsnap (1.17.0)
       msgpack (~> 1.2)
     coderay (1.1.3)
-    concurrent-ruby (1.2.3)
+    concurrent-ruby (1.3.3)
     diff-lcs (1.5.0)
     docile (1.4.0)
     i18n (1.10.0)

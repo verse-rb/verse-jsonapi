@@ -98,7 +98,10 @@ module Verse
 
             raise "incorrect path for update: `#{path}`" unless key_name
 
-            dsl.parent.key_type.call(field(key_name))
+            resource_class = dsl.parent.resource_class
+            pkey = resource_class.primary_key
+            type = resource_class.fields[pkey].fetch(:type, Object)
+            field(key_name, type)
 
             field(:data, Hash) do
               field(:type, String).in?(dsl.parent.resource_class.type)
