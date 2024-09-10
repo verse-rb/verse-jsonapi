@@ -70,6 +70,8 @@ module Verse
         end
       end
 
+      # rubocop:disable Style/OptionalBooleanParameter
+      # :nodoc:
       def to_h(root = true)
         x = \
           if model?
@@ -102,6 +104,7 @@ module Verse
           x
         end
       end
+      # rubocop:enable Style/OptionalBooleanParameter
 
       def attributes
         (@data.is_a?(Hash) && @data[:attributes]) || nil
