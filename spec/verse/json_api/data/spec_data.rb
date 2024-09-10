@@ -3,6 +3,7 @@
 class UserRecord < Verse::Model::Record::Base
   field :id, primary: true, type: Integer
   field :name, type: String
+  field :age, type: Integer
 
   has_many :posts
   has_many :comments

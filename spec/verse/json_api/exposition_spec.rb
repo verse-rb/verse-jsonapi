@@ -24,7 +24,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
     it "allows creation with good input", as: :user do
       expect_any_instance_of(TestService).to receive(:create){ |_obj, attr|
         expect(attr.name).to eq("John")
-      }.and_return(UserRecord.new({ id: 1, name: "John" }))
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
 
       post "/users", {
         data: {
@@ -39,7 +39,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           data: {
             id: "1",
             type: "users",
-            attributes: { name: "John" }
+            attributes: { name: "John", age: 20 }
           }
         }
       )
@@ -67,9 +67,35 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({ id: 1, name: "John" })])
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 19 })])
 
       get "/users"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              id: "1",
+              type: "users",
+              attributes: { name: "John", age: 19 }
+            }
+          ]
+        }
+      )
+    end
+
+    it "filters the attribues" do
+      expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
+        expect(filters).to eq({})
+        expect(included).to eq([])
+        expect(page).to eq(1)
+        expect(items_per_page).to eq(1000)
+        expect(sort).to eq(nil)
+        expect(query_count).to eq(false)
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 19 })])
+
+      get "/users?fields[users][]=name"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -93,7 +119,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({ id: 1, name: "John" })])
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 20 })])
 
       get "/users?filter[name]=John"
 
@@ -104,14 +130,14 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
             {
               id: "1",
               type: "users",
-              attributes: { name: "John" }
+              attributes: { name: "John", age: 20 }
             }
           ]
         }
       )
     end
 
-    it "filters out unallowed filters" do
+    it "ignores unallowed filters" do
       expect_any_instance_of(TestService).to receive(:index){ |_obj, filters, included:, page:, items_per_page:, sort:, query_count:|
         expect(filters).to eq({})
         expect(included).to eq([])
@@ -119,7 +145,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({ id: 1, name: "John" })])
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 20 })])
 
       get "/users?filter[unallowed]=John"
 
@@ -130,7 +156,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
             {
               id: "1",
               type: "users",
-              attributes: { name: "John" }
+              attributes: { name: "John", age: 20 }
             }
           ]
         }
@@ -145,7 +171,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({ id: 1, name: "John" })])
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 20 })])
 
       get "/users?filter[name__match]=John"
 
@@ -156,7 +182,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
             {
               id: "1",
               type: "users",
-              attributes: { name: "John" }
+              attributes: { name: "John", age: 20 }
             }
           ]
         }
@@ -182,7 +208,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(items_per_page).to eq(1000)
         expect(sort).to eq(nil)
         expect(query_count).to eq(false)
-      }.and_return([UserRecord.new({ id: 1, name: "John" })])
+      }.and_return([UserRecord.new({ id: 1, name: "John", age: 20 })])
 
       get "/users?included[]=posts"
 
@@ -193,7 +219,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
             {
               id: "1",
               type: "users",
-              attributes: { name: "John" }
+              attributes: { name: "John", age: 20 }
             }
           ]
         }
@@ -206,9 +232,29 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       expect_any_instance_of(TestService).to receive(:show){ |_obj, id, included:|
         expect(id).to eq(1)
         expect(included).to eq([])
-      }.and_return(UserRecord.new({ id: 1, name: "John" }))
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
 
       get "/users/1"
+
+      expect(last_response.status).to eq(200)
+      expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
+        {
+          data: {
+            id: "1",
+            type: "users",
+            attributes: { name: "John", age: 20 }
+          }
+        }
+      )
+    end
+
+    it "filter out the attributes" do
+      expect_any_instance_of(TestService).to receive(:show){ |_obj, id, included:|
+        expect(id).to eq(1)
+        expect(included).to eq([])
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
+
+      get "/users/1?fields[users][]=name"
 
       expect(last_response.status).to eq(200)
       expect(JSON.parse(last_response.body, symbolize_names: true)).to eq(
@@ -234,7 +280,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       expect_any_instance_of(TestService).to receive(:show){ |_obj, id, included:|
         expect(id).to eq(1)
         expect(included).to eq(["posts"])
-      }.and_return(UserRecord.new({ id: 1, name: "John" }))
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
 
       get "/users/1?included[]=posts"
 
@@ -244,7 +290,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           data: {
             id: "1",
             type: "users",
-            attributes: { name: "John" }
+            attributes: { name: "John", age: 20 }
           }
         }
       )
@@ -256,12 +302,12 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
       expect_any_instance_of(TestService).to receive(:update){ |_obj, struct|
         expect(struct.id).to eq(1)
         expect(struct.name).to eq("John")
-      }.and_return(UserRecord.new({ id: 1, name: "John" }))
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
 
       patch "/users/1", {
         data: {
           type: "users",
-          attributes: { name: "John" }
+          attributes: { name: "John", age: 20 }
         }
       }
 
@@ -271,7 +317,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           data: {
             id: "1",
             type: "users",
-            attributes: { name: "John" }
+            attributes: { name: "John", age: 20 }
           }
         }
       )
@@ -282,12 +328,12 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
         expect(struct.id).to eq(1)
         expect(struct.attributes[:name]).to eq("John")
         expect(struct.attributes[:secret_field]).to eq(nil)
-      }.and_return(UserRecord.new({ id: 1, name: "John" }))
+      }.and_return(UserRecord.new({ id: 1, name: "John", age: 20 }))
 
       patch "/users/1", {
         data: {
           type: "users",
-          attributes: { name: "John", secret_field: "Very secret" }
+          attributes: { name: "John", secret_field: "Very secret", age: 20 }
         }
       }
 
@@ -297,7 +343,7 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           data: {
             id: "1",
             type: "users",
-            attributes: { name: "John" }
+            attributes: { name: "John", age: 20 }
           }
         }
       )

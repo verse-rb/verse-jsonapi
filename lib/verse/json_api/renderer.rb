@@ -12,6 +12,17 @@ module Verse
         @pretty = true
       end
 
+      def fields=(fields)
+        @fields = fields.each_with_object({}) do |(key, list), h|
+          h[key.to_sym] = Set.new(list.map(&:to_sym))
+          h
+        end
+      end
+
+      def fields
+        @fields || {}
+      end
+
       def render(object, ctx)
         ctx.content_type(ctx.content_type || "application/vnd.api+json")
 
@@ -116,9 +127,7 @@ module Verse
           end
 
         if Verse::Http::Plugin.show_error_details?
-          output[:meta] = {
-            backtrace: error.backtrace
-          }
+          output[:meta] = { backtrace: error.backtrace }
         end
 
         output
@@ -140,6 +149,7 @@ module Verse
         }.compact
       end
 
+      # rubocop:disable Style/OptionalBooleanParameter
       def gather_included(record, root = true, include_set = Set.new)
         return unless record.is_a?(Verse::Model::Record::Base)
 
@@ -166,6 +176,7 @@ module Verse
 
         include_set
       end
+      # rubocop:enable Style/OptionalBooleanParameter
 
       def render_record(record, field_set, link)
         out = {
@@ -184,7 +195,12 @@ module Verse
       end
 
       def render_attributes(record, field_set)
+        type = record.type.to_sym
+        render_fields = @fields&.fetch(type, nil)
+
         record.class.fields.except(:id, :type).each_with_object({}) do |(field, key), h|
+          next h if render_fields && !render_fields.include?(field)
+
           unless key.fetch(:visible, true) == true || field_set.include?(key[:visible])
             next h
           end
@@ -202,25 +218,12 @@ module Verse
 
           next unless relations
 
-          relationships[key] = if value.opts[:array]
-                                 if relations.nil?
-                                   { data: [] }
-                                 else
-                                   {
-                                     data: relations.map { |r|
-                                       render_record(r, field_set, true)
-                                     }
-                                   }
-                                 end
-                               elsif relations.nil?
-                                 {
-                                   data: nil
-                                 }
-                               else
-                                 {
-                                   data: render_record(relations, field_set, true)
-                                 }
-                               end
+          if value.opts[:array]
+            content = relations.map{ |r| render_record(r, field_set, true) }
+            relationships[key] = { data: content }
+          else
+            relationships[key] = { data: relations && render_record(relations, field_set, true) }
+          end
         end
 
         relationships.empty? ? nil : relationships

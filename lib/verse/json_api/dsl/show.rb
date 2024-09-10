@@ -35,6 +35,7 @@ module Verse
               input dsl.create_schema
             end
             define_method(:show) {
+              renderer.fields = params.fetch(:fields, {})
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
               instance_exec(service, &body)
             }
@@ -55,6 +56,12 @@ module Verse
 
             field(key_name, type)
             field?(:included, Array, of: String).rule("included unauthorized"){ |value| value.all?{ |v| dsl.parent.allowed_included.include?(v) } }
+
+            field?(:fields, Hash, of: Array).transform do |fields|
+              fields.transform_values do |arr|
+                arr.map(&:to_sym)
+              end
+            end
           end
         end
       end

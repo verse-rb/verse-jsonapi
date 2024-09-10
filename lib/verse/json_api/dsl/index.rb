@@ -46,6 +46,7 @@ module Verse
               input dsl.create_schema
             end
             define_method(:index) {
+              renderer.fields = params.fetch(:fields, {})
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
               instance_exec(service, &body)
             }
@@ -83,6 +84,12 @@ module Verse
 
             field?(:included, Array, of: String).rule("must be one of `#{dsl.parent.allowed_included.join(",")}`") do |arr|
               arr.all?{ |it| dsl.parent.allowed_included.include?(it) }
+            end
+
+            field?(:fields, Hash, of: Array).transform do |fields|
+              fields.transform_values do |arr|
+                arr.map(&:to_sym)
+              end
             end
           end
         end

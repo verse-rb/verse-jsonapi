@@ -71,13 +71,13 @@ RSpec.describe Verse::JsonApi::Deserializer do
       end
 
       it "idempotence" do
-        example =  %<{"data":{"type":"falseclass","attributes":{"active":false}}}>
+        example = %<{"data":{"type":"falseclass","attributes":{"active":false}}}>
 
         expect(subject.deserialize(example)).to eq(subject.deserialize(subject.deserialize(example)))
       end
 
       it "metadata" do
-        example =  %<{"data":{"type":"falseclass","attributes":{"active":false}}, "meta": {"a": 1, "b": true}}>
+        example = %<{"data":{"type":"falseclass","attributes":{"active":false}}, "meta": {"a": 1, "b": true}}>
         output = subject.deserialize(example)
         expect(output.meta).to eq({ a: 1, b: true })
       end
