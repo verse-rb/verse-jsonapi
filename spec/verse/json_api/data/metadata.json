@@ -1,0 +1,12 @@
+{
+  "data": {
+    "type": "falseclass",
+    "attributes": {
+      "active": false
+    }
+  },
+  "meta": {
+    "a": 1,
+    "b": true
+  }
+}

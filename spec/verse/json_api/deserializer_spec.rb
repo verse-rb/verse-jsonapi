@@ -8,7 +8,7 @@ RSpec.describe Verse::JsonApi::Deserializer do
       let(:examples) {
         [
           {
-            source: %<{"data":[{"type":"articles","id":"1","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"},"relationships":{"author":{"data":{"id":"42","type":"people"}}}}],"included":[{"type":"people","id":"42","attributes":{"name":"John","age":80,"gender":"male"}}]}>,
+            source: "articles.json",
             expected: ->(data, _) {
               expect(data.class).to eq(Verse::JsonApi::Struct)
               expect(data.array?).to be(true)
@@ -24,7 +24,7 @@ RSpec.describe Verse::JsonApi::Deserializer do
             }
           }, {
             # test with mono-object
-            source: %<{"data":{"type":"articles","id":"3","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"}}}>,
+            source: "article.json",
             expected: ->(data, _) {
               expect(data.class).to eq(Verse::JsonApi::Struct)
               expect(data.type).to eq("articles")
@@ -32,7 +32,7 @@ RSpec.describe Verse::JsonApi::Deserializer do
             }
           }, {
             # test with non-included object
-            source: %<{"data":{"type":"articles","id":"3","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"},"relationships":{"author":{"data":{"id":"42","type":"people"}}}}}>,
+            source: "article_with_non_included_author.json",
             expected: ->(data, _) {
               expect(data.class).to eq(Verse::JsonApi::Struct)
               expect(data.type).to eq("articles")
@@ -43,18 +43,18 @@ RSpec.describe Verse::JsonApi::Deserializer do
             }
           }, {
             # test with paginated data
-            source: %<{"meta":{"totalPages":13},"data":[{"type":"articles","id":"3","attributes":{"title":"JSON:API paints my bikeshed!","body":"The shortest article. Ever.","created":"2015-05-22T14:56:29.000Z","updated":"2015-05-22T14:56:28.000Z"}}],"links":{"self":"http://example.com/articles?page[number]=3&page[size]=1","first":"http://example.com/articles?page[number]=1&page[size]=1","prev":"http://example.com/articles?page[number]=2&page[size]=1","next":"http://example.com/articles?page[number]=4&page[size]=1","last":"http://example.com/articles?page[number]=13&page[size]=1"}}>,
+            source: "paginated_data.json",
             expected: ->(data, _) {
               expect(data.class).to eq(Verse::JsonApi::Struct)
               first = data.data.first
               # check that attributes are valid.
               expect(first.type).to eq("articles")
             }
-          },
-          {
-            source: %<{"data":{"type":"falseclass","attributes":{"active":false}}}>,
+          }, {
+            source: "metadata.json",
             expected: ->(data, _) {
-              expect(data.active).to eq(false)
+              expect(data.class).to eq(Verse::JsonApi::Struct)
+              expect(data.meta).to eq({ a: 1, b: true })
             }
           }
         ]
@@ -62,7 +62,13 @@ RSpec.describe Verse::JsonApi::Deserializer do
 
       it "deserializes json:api objects" do
         examples.each do |example|
-          json = JSON.parse(example[:source], symbolize_names: true)
+          json = JSON.parse(
+            File.read(
+              File.join(__dir__, "data", example[:source])
+            ),
+            symbolize_names: true
+          )
+
           example[:expected].call(
             subject.deserialize(json),
             json
@@ -70,16 +76,16 @@ RSpec.describe Verse::JsonApi::Deserializer do
         end
       end
 
-      it "idempotence" do
+      it "idempotence check" do
         example = %<{"data":{"type":"falseclass","attributes":{"active":false}}}>
 
-        expect(subject.deserialize(example)).to eq(subject.deserialize(subject.deserialize(example)))
-      end
-
-      it "metadata" do
-        example = %<{"data":{"type":"falseclass","attributes":{"active":false}}, "meta": {"a": 1, "b": true}}>
-        output = subject.deserialize(example)
-        expect(output.meta).to eq({ a: 1, b: true })
+        expect(
+          subject.deserialize(example)
+        ).to eq(
+          subject.deserialize(
+            subject.deserialize(example)
+          )
+        )
       end
 
       it "raises error on bad format" do
