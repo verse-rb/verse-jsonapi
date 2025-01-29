@@ -35,7 +35,7 @@ module Verse
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
-              desc "Create #{dsl.parent.resource_class.type}"
+              desc "Create a new #{dsl.parent.resource_class.type}"
               input dsl.create_schema
             end
             define_method(:create) do
