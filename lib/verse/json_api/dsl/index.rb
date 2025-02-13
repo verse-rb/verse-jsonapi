@@ -55,7 +55,7 @@ module Verse
 
         def create_schema
           dsl = self
-          Verse::Schema.define do
+          Verse::Schema.define(parent.base_schema) do
             field?(:page, Hash) do
               field(:number, Integer).default(1).rule("must be positive"){ |v| v > 0 }
               field(:size, Integer).default(dsl.max_items_per_pages).rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v| v > 0 && v <= dsl.max_items_per_pages }

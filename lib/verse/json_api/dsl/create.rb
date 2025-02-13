@@ -94,7 +94,7 @@ module Verse
             end
           end
 
-          Verse::Schema.define do
+          Verse::Schema.define(parent.base_schema) do
             field(:data, Hash) do
               field(:type, String).in?(dsl.parent.resource_class.type)
               field(:attributes, schema)

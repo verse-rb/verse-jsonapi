@@ -50,7 +50,7 @@ module Verse
           raise "incorrect path for delete: `#{path}`" unless key_name
 
           dsl = self
-          Verse::Schema.define do
+          Verse::Schema.define(parent.base_schema) do
             resource_class = dsl.parent.resource_class
             pkey = resource_class.primary_key
             type = resource_class.fields[pkey].fetch(:type, Object)
