@@ -51,6 +51,7 @@ module Verse
 
         def create_schema
           dsl = self
+
           Verse::Schema.define(parent.base_schema) do
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
 

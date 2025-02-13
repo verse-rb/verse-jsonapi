@@ -39,7 +39,11 @@ module Verse
         #
         # @return [Verse::Schema] The base schema.
         def base_schema(&block)
-          @base_schema = Verse::Schema.define(&block)
+          if block
+            @base_schema = Verse::Schema.define(&block)
+          else
+            @base_schema
+          end
         end
 
         # Declares a JSON:API create route for this exposition.

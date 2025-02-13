@@ -62,6 +62,7 @@ module Verse
 
         def create_schema
           dsl = self
+
           Verse::Schema.define(parent.base_schema) do
             field?(:page, Hash) do
               field(:number, Integer).default(1).rule("must be positive"){ |v| v > 0 }
