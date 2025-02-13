@@ -19,15 +19,17 @@ module Verse
         instruction :path, ":resource_id"
         instruction :method, :get
 
-        instruction :body
+        instruction :body, type: :proc
 
         def install
           dsl = self
 
-          body = @body || ->(service) {
+          default_body = proc do |service|
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
             service.show(params[key_name.to_sym], included: params.fetch(:included, []))
-          }
+          end
+
+          body = @body || default_body
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
@@ -37,7 +39,12 @@ module Verse
             define_method(:show) {
               renderer.fields = params.fetch(:fields, {})
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
-              instance_exec(service, &body)
+
+              instance_exec(
+                service,
+                proc { instance_exec(service, &default_body) },
+                &body
+              )
             }
           end
         end

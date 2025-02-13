@@ -43,6 +43,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
           }
         }
       )
+
+      # We created a special body in the test set, let see if it triggers:
+      expect(TestExposition.trigger).to eq(true)
     end
   end
 

@@ -19,20 +19,22 @@ module Verse
         instruction :path, ":resource_id"
         instruction :method, :patch
 
-        instruction :ignored_fields, []
+        instruction :ignored_fields, [], type: :array
 
-        instruction :authorized_relationships, {}
+        instruction :authorized_relationships, {}, type: :hash
 
-        instruction :body
+        instruction :body, type: :proc
         instruction :schema
 
         def install
           dsl = self
 
-          body = @body || ->(value) {
+          default_body = proc do |service|
             dsl.path[/:(\w+)/, 1]&.to_sym
-            send(dsl.parent.service).update(value)
-          }
+            service.update(params)
+          end
+
+          body = @body || default_body
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
@@ -40,7 +42,13 @@ module Verse
               input dsl.create_schema
             end
             define_method(:update) do
-              instance_exec(params, &body)
+              service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
+
+              instance_exec(
+                service,
+                proc { instance_exec(service, &default_body) },
+                &body
+              )
             end
           end
         end

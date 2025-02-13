@@ -13,6 +13,10 @@ class TestService < Verse::Service::Base
 end
 
 class TestExposition < Verse::Exposition::Base
+  class << self
+    attr_accessor :trigger
+  end
+
   http_path "/users"
 
   use_service TestService
@@ -25,7 +29,12 @@ class TestExposition < Verse::Exposition::Base
     show
     update
 
-    create
+    create do
+      body do |_service, default|
+        TestExposition.trigger = true
+        default.call
+      end
+    end
     delete
     index do
       allowed_filters :name__match

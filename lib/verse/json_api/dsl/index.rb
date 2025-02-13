@@ -19,17 +19,17 @@ module Verse
         instruction :path, ""
         instruction :method, :get
 
-        instruction :body
+        instruction :body, type: :proc
 
-        instruction :allowed_filters, []
-        instruction :blacklist_filters, []
+        instruction :allowed_filters, [], type: :array
+        instruction :blacklist_filters, [], type: :array
 
         instruction :max_items_per_pages, 1000
 
         def install
           dsl = self
 
-          body = @body || ->(service) {
+          default_body = proc do |service|
             service.index(
               params.fetch(:filter, {}),
               included: params.fetch(:included, []),
@@ -38,7 +38,9 @@ module Verse
               sort: params&.fetch(:sort, nil)&.split(","),
               query_count: params.fetch(:count, false)
             )
-          }
+          end
+
+          body = @body || default_body
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
@@ -48,7 +50,12 @@ module Verse
             define_method(:index) {
               renderer.fields = params.fetch(:fields, {})
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
-              instance_exec(service, &body)
+
+              instance_exec(
+                service,
+                proc { instance_exec(service, &default_body) },
+                &body
+              )
             }
           end
         end

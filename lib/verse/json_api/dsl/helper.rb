@@ -14,9 +14,19 @@ module Verse
           end.join("/")
         end
 
-        def instruction(name, default_value = nil)
-          case default_value
-          when Hash
+        def instruction(name, default_value = nil, type: :simple)
+          case type
+          when :simple
+            define_method(name) do |value = NOTHING|
+              if value != NOTHING
+                instance_variable_set("@#{name}", value)
+                self
+              else
+                instance_variable_get("@#{name}") || default_value
+              end
+            end
+
+          when :hash
             define_method(name) do |**values|
               if values.any?
                 instance_variable_set("@#{name}", values)
@@ -25,28 +35,21 @@ module Verse
                 instance_variable_get("@#{name}") || default_value
               end
             end
-          when Proc
+
+          when :proc
             define_method(name) do |&block|
-              if block_given?
+              if block
                 instance_variable_set("@#{name}", block)
                 self
               else
                 instance_variable_get("@#{name}") || default_value
               end
             end
-          when Array
+
+          when :array
             define_method(name) do |*values|
               if values.any?
                 instance_variable_set("@#{name}", values)
-                self
-              else
-                instance_variable_get("@#{name}") || default_value
-              end
-            end
-          else
-            define_method(name) do |value = NOTHING|
-              if value != NOTHING
-                instance_variable_set("@#{name}", value)
                 self
               else
                 instance_variable_get("@#{name}") || default_value

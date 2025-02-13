@@ -19,18 +19,24 @@ module Verse
         instruction :path, ":resource_id"
         instruction :method, :delete
 
-        instruction :body
+        instruction :body, type: :proc
         instruction :schema
 
         def install
           dsl = self
 
-          body = @body || ->(service) {
-            key_name = dsl.path[/:(\w+)/, 1]&.to_sym
+          default_body = proc do |service|
+            # Get the last parameter from the path, which is the key name
+            # we are looking for
+            key_name = dsl.path.scan(/:(\w+)/).last&.first&.to_sym
             server.response.status = 204
+
             service.delete(params[key_name.to_sym])
+
             server.no_content
-          }
+          end
+
+          body = @body || default_body
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
@@ -39,7 +45,12 @@ module Verse
             end
             define_method(:delete) {
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
-              instance_exec(service, &body)
+
+              instance_exec(
+                service,
+                proc { instance_exec(service, &default_body) },
+                &body
+              )
             }
           end
         end

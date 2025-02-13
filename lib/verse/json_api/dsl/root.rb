@@ -17,7 +17,7 @@ module Verse
 
         instruction :path, ""
         instruction :service, :service
-        instruction :allowed_included, []
+        instruction :allowed_included, [], type: :array
 
         def initialize(exposition_class, resource_class, &block)
           @exposition_class = exposition_class
