@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Verse::JsonApi::Util do
   let(:record_class) do
     Class.new(Verse::Model::Record::Base) do
@@ -5,7 +7,7 @@ RSpec.describe Verse::JsonApi::Util do
 
       field :name, type: String
 
-      field(:age, type: Integer, meta: {description: "The age of the person"})
+      field(:age, type: Integer, meta: { description: "The age of the person" })
 
       field :secret, type: String, visible: false
     end
@@ -18,15 +20,15 @@ RSpec.describe Verse::JsonApi::Util do
       schema = subject.jsonapi_record(record_class)
 
       result = schema.validate({
-        data: {
-          type: "people",
-          id: "1",
-          attributes: {
-            name: "John",
-            age: 30
-          }
-        }
-      })
+                                 data: {
+                                   type: "people",
+                                   id: "1",
+                                   attributes: {
+                                     name: "John",
+                                     age: 30
+                                   }
+                                 }
+                               })
 
       expect(result).to be_success
     end
@@ -37,17 +39,17 @@ RSpec.describe Verse::JsonApi::Util do
       schema = subject.jsonapi_collection(record_class)
 
       result = schema.validate({
-        data: [
-          {
-            type: "people",
-            id: "1",
-            attributes: {
-              name: "John",
-              age: 30
-            }
-          }
-        ]
-      })
+                                 data: [
+                                   {
+                                     type: "people",
+                                     id: "1",
+                                     attributes: {
+                                       name: "John",
+                                       age: 30
+                                     }
+                                   }
+                                 ]
+                               })
 
       expect(result).to be_success
     end

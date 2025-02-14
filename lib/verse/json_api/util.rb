@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Verse
   module JsonApi
     module Util
@@ -12,7 +14,6 @@ module Verse
       # @return [Verse::Schema::Base] the schema
       def jsonapi_record(record)
         Verse::Schema.define do
-
           field(:data, Hash) do
             field(:type, String).filled
 
@@ -66,7 +67,6 @@ module Verse
           field?(:included, Array, of: Hash)
         end
       end
-
     end
   end
 end
