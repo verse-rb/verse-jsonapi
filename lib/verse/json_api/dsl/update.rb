@@ -114,7 +114,10 @@ module Verse
             field(:data, Hash) do
               field(:type, String).in?(dsl.parent.resource_class.type)
               field(:attributes, schema)
-              field?(:relationships, relations)
+
+              if relations.fields.any?
+                field?(:relationships, relations)
+              end
             end
 
             transform do |hash|

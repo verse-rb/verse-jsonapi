@@ -13,7 +13,7 @@ module Verse
       class Root
         extend Helper
 
-        attr_reader :exposition_class, :resource_class, :base_schema
+        attr_reader :exposition_class, :resource_class
 
         instruction :path, ""
         instruction :service, :service
