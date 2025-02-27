@@ -66,7 +66,7 @@ module Verse
 
               type = config.fetch(:type, Object)
 
-              field?(field, type)
+              field?(field, type).meta(**config.slice(:desc, :description, :example))
             end
           end
 

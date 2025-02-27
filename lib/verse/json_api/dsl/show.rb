@@ -34,7 +34,7 @@ module Verse
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Show a specific #{dsl.parent.resource_class.type}"
-              input dsl.create_schema
+              input dsl.show_schema
             end
             define_method(:show) {
               renderer.fields = params.fetch(:fields, {})
@@ -49,7 +49,7 @@ module Verse
           end
         end
 
-        def create_schema
+        def show_schema
           dsl = self
 
           Verse::Schema.define(parent.base_schema) do

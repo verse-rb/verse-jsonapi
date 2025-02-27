@@ -39,7 +39,7 @@ module Verse
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Update a #{dsl.parent.resource_class.type}"
-              input dsl.create_schema
+              input dsl.update_schema
             end
             define_method(:update) do
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
@@ -53,7 +53,7 @@ module Verse
           end
         end
 
-        def create_schema
+        def update_schema
           dsl = self
 
           schema = @schema || Verse::Schema.define do
@@ -65,7 +65,9 @@ module Verse
 
               type = config.fetch(:type, Object)
 
-              field?(field, type)
+              unless config[:readonly]
+                field?(field, type).meta(**config.slice(:desc, :description, :example))
+              end
             end
           end
 
@@ -101,7 +103,7 @@ module Verse
             end
           end
 
-          Verse::Schema.define do
+          Verse::Schema.define(parent.base_schema) do
             key_name = dsl.path[/:(\w+)/, 1]&.to_sym
 
             raise "incorrect path for update: `#{path}`" unless key_name
