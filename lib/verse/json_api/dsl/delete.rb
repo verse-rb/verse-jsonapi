@@ -40,7 +40,7 @@ module Verse
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
-              desc "Delete the #{dsl.parent.resource_class.type}"
+              desc "Delete the `#{dsl.parent.resource_class.type}`"
               input dsl.create_schema
             end
             define_method(:delete) {

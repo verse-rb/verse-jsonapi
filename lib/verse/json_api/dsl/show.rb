@@ -35,6 +35,7 @@ module Verse
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Show a specific #{dsl.parent.resource_class.type}"
               input dsl.show_schema
+              output Util.jsonapi_record(dsl.parent.resource_class)
             end
             define_method(:show) {
               renderer.fields = params.fetch(:fields, {})

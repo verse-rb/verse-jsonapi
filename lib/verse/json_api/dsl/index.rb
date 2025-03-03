@@ -44,8 +44,9 @@ module Verse
 
           @exposition_class.class_eval do
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
-              desc "Return a paginated list of #{dsl.parent.resource_class.type}"
+              desc "Return a paginated list of `#{dsl.parent.resource_class.type}`"
               input dsl.create_schema
+              output Util.jsonapi_collection(dsl.parent.resource_class)
             end
             define_method(:index) {
               renderer.fields = params.fetch(:fields, {})
@@ -65,11 +66,20 @@ module Verse
 
           Verse::Schema.define(parent.base_schema) do
             field?(:page, Hash) do
-              field(:number, Integer).default(1).rule("must be positive"){ |v| v > 0 }
-              field(:size, Integer).default(dsl.max_items_per_pages).rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v| v > 0 && v <= dsl.max_items_per_pages }
+              field(:number, Integer).default(1).rule("must be positive"){ |v| v > 0 }.meta(
+                desc: "The page number, default to 1"
+              )
+              field(:size, Integer).default(dsl.max_items_per_pages)
+                .rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v|
+                  v > 0 && v <= dsl.max_items_per_pages
+              }.meta(desc: "The number of items per page, default to #{dsl.max_items_per_pages}")
             end
-            field?(:sort, String)
-            field(:count, TrueClass).default(false)
+            field?(:sort, String).meta(
+              desc: "The sort order, comma separated list of fields. See sorting section for more details"
+            )
+            field(:count, TrueClass).default(false).meta(
+              desc: "Set to true to return the total number of items in the collection"
+            )
 
             field?(:filter, Hash) do
               dsl.parent.resource_class.fields.each do |field|
@@ -90,15 +100,27 @@ module Verse
               end
             end
 
-            field?(:included, Array, of: String).rule("must be one of `#{dsl.parent.allowed_included.join(",")}`") do |arr|
-              arr.all?{ |it| dsl.parent.allowed_included.include?(it) }
+            if dsl.parent.allowed_included.any?
+              field?(:included, Array, of: String).rule("must be one of `#{dsl.parent.allowed_included.join(",")}`") do |arr|
+                arr.all?{ |it| dsl.parent.allowed_included.include?(it) }
+              end.meta(
+                desc: <<-MD
+                  The related resources to include in the response. Allowed resources are:
+                  #{dsl.parent.allowed_included.map{|inc| "- `#{inc}`"}.join("\n")}
+                MD
+              )
             end
 
             field?(:fields, Hash, of: Array).transform do |fields|
               fields.transform_values do |arr|
                 arr.map(&:to_sym)
               end
-            end
+            end.meta(
+              desc: <<-MD
+                The fields to include in the response.
+                The key is the resource type and the value is an array of fields.
+              MD
+            )
           end
         end
       end
