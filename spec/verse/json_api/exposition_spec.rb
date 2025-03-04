@@ -355,8 +355,9 @@ RSpec.describe Verse::JsonApi::ExpositionDsl, type: :exposition do
 
   context "metadata" do
     it "stores metadata on exposition endpoint" do
-      expect(TestExposition.exposed_endpoints[:show][:meta].meta).to eq(nodoc: true)
+      expect(
+        TestExposition.exposed_endpoints[:show][:meta].meta
+      ).to eq(nodoc: true)
     end
   end
-
 end

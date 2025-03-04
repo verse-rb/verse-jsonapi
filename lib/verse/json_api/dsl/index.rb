@@ -73,8 +73,8 @@ module Verse
                 desc: "The page number, default to 1"
               )
               field(:size, Integer).default(dsl.max_items_per_pages)
-                .rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v|
-                  v > 0 && v <= dsl.max_items_per_pages
+                                   .rule("must be between 1 and #{dsl.max_items_per_pages}"){ |v|
+                v > 0 && v <= dsl.max_items_per_pages
               }.meta(desc: "The number of items per page, default to #{dsl.max_items_per_pages}")
             end
             field?(:sort, String).meta(
@@ -109,7 +109,7 @@ module Verse
               end.meta(
                 desc: <<-MD
                   The related resources to include in the response. Allowed resources are:
-                  #{dsl.parent.allowed_included.map{|inc| "- `#{inc}`"}.join("\n")}
+                  #{dsl.parent.allowed_included.map{ |inc| "- `#{inc}`" }.join("\n")}
                 MD
               )
             end
