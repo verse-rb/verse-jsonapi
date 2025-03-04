@@ -26,7 +26,9 @@ class TestExposition < Verse::Exposition::Base
 
     allowed_included "posts"
 
-    show
+    show do
+      meta nodoc: true # Add nodoc meta to the show route
+    end
     update
 
     create do

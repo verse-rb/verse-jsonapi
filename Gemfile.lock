@@ -19,7 +19,7 @@ GIT
 
 GIT
   remote: git@github.com:verse-rb/verse-schema.git
-  revision: 0581105d8ecd5dc04df8f348e649068ebd1c9b78
+  revision: da717d8b2155cf477a3ded8932735362b4987658
   branch: master
   specs:
     verse-schema (0.1.0)

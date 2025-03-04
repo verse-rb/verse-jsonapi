@@ -18,6 +18,7 @@ module Verse
 
         instruction :path, ":resource_id"
         instruction :method, :delete
+        instruction :meta, {}, type: :hash
 
         instruction :body, type: :proc
         instruction :schema
@@ -42,6 +43,7 @@ module Verse
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Delete the `#{dsl.parent.resource_class.type}`"
               input dsl.create_schema
+              meta(dsl.meta) if dsl.meta
             end
             define_method(:delete) {
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)

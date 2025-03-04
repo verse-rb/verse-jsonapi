@@ -18,6 +18,7 @@ module Verse
 
         instruction :path, ""
         instruction :method, :get
+        instruction :meta, {}, type: :hash
 
         instruction :body, type: :proc
 
@@ -47,6 +48,8 @@ module Verse
               desc "Return a paginated list of `#{dsl.parent.resource_class.type}`"
               input dsl.create_schema
               output Util.jsonapi_collection(dsl.parent.resource_class)
+
+              meta(dsl.meta) if dsl.meta
             end
             define_method(:index) {
               renderer.fields = params.fetch(:fields, {})

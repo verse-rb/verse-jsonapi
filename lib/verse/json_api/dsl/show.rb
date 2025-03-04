@@ -18,6 +18,7 @@ module Verse
 
         instruction :path, ":resource_id"
         instruction :method, :get
+        instruction :meta, {}, type: :hash
 
         instruction :body, type: :proc
 
@@ -36,6 +37,7 @@ module Verse
               desc "Show a specific `#{dsl.parent.resource_class.type}`"
               input dsl.show_schema
               output Util.jsonapi_record(dsl.parent.resource_class)
+              meta(dsl.meta) if dsl.meta
             end
             define_method(:show) {
               renderer.fields = params.fetch(:fields, {})

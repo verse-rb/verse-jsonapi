@@ -18,6 +18,7 @@ module Verse
 
         instruction :path, ""
         instruction :method, :post
+        instruction :meta, {}, type: :hash
 
         instruction :ignored_fields, [], type: :array
 
@@ -41,6 +42,7 @@ module Verse
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Create a new `#{dsl.parent.resource_class.type}`"
               input dsl.create_schema
+              meta(dsl.meta) if dsl.meta
             end
             define_method(:create) do
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)

@@ -18,6 +18,7 @@ module Verse
 
         instruction :path, ":resource_id"
         instruction :method, :patch
+        instruction :meta, {}, type: :hash
 
         instruction :ignored_fields, [], type: :array
 
@@ -40,6 +41,7 @@ module Verse
             expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
               desc "Update a `#{dsl.parent.resource_class.type}`"
               input dsl.update_schema
+              meta(dsl.meta) if dsl.meta
             end
             define_method(:update) do
               service = send(dsl.parent.service) if respond_to?(dsl.parent.service)
