@@ -23,15 +23,15 @@ module Verse
         @fields || {}
       end
 
-      def render(object, ctx)
-        ctx.content_type(ctx.content_type || "application/vnd.api+json")
+      def render(object, server)
+        server.content_type(server.content_type || "application/vnd.api+json")\
 
         # rubocop:disable Style/EmptyElse
         case object
         when Verse::Error::Base
-          ctx.status object.class.http_code
+          server.response.status = object.class.http_code
         when Exception
-          ctx.status 500
+          server.response.status = 500
         else
           # keep status as-is
         end
@@ -66,8 +66,14 @@ module Verse
         @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end
 
-      def render_error(error, _ctx)
+      def render_error(error, server)
         output = render_error_object(error)
+
+        if error.class.respond_to?(:http_code)
+          server.response.status = error.class.http_code
+        else
+          server.response.status = 500
+        end
 
         @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end

@@ -11,5 +11,3 @@ module Verse
     end
   end
 end
-
-Verse::Exposition::Base.extend(Verse::JsonApi::ExpositionDsl)

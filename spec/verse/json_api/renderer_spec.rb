@@ -4,19 +4,25 @@ require "spec_helper"
 require_relative "data/spec_data"
 
 RSpec.describe Verse::JsonApi::Renderer do
-  let(:ctx) {
-    out = double("ctx", content_type: nil)
-    expect(out).to receive(:content_type).with("application/vnd.api+json")
-    allow(out).to receive(:status)
+  let(:server) {
+    server = double("server")
+    allow(server).to receive(:content_type)
+    expect(server).to receive(:content_type).with("application/vnd.api+json")
+    allow(server).to receive(:status)
 
-    out
+    response_mock = double("response")
+    allow(response_mock).to receive(:status=)
+    allow(response_mock).to receive(:status)
+    allow(server).to receive(:response).and_return(response_mock)
+
+    server
   }
 
   context "render object" do
     it "renders a model" do
       model = UserRecord.new({ id: 1, name: "John", age: 21 })
 
-      output = subject.render(model, ctx)
+      output = subject.render(model, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: {
@@ -44,7 +50,7 @@ RSpec.describe Verse::JsonApi::Renderer do
       set.add_collection([UserRecord, "posts"], "1", posts_collection)
       model = UserRecord.new({ id: 1, name: "John", age: 21 }, include_set: set)
 
-      output = subject.render(model, ctx)
+      output = subject.render(model, server)
 
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
@@ -108,7 +114,7 @@ RSpec.describe Verse::JsonApi::Renderer do
 
       subject.fields = { users: [], posts: [:title] }
 
-      output = subject.render(model, ctx)
+      output = subject.render(model, server)
 
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
@@ -157,7 +163,7 @@ RSpec.describe Verse::JsonApi::Renderer do
         UserRecord.new({ id: 2, name: "Jane", age: 21 })
       ]
 
-      output = subject.render(collection, ctx)
+      output = subject.render(collection, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: [
@@ -179,7 +185,7 @@ RSpec.describe Verse::JsonApi::Renderer do
     it "renders an empty collection (array with metadata)" do
       collection = Verse::Util::ArrayWithMetadata.new([])
 
-      output = subject.render(collection, ctx)
+      output = subject.render(collection, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: [],
@@ -196,7 +202,7 @@ RSpec.describe Verse::JsonApi::Renderer do
         ], metadata: { total: 2 }
       )
 
-      output = subject.render(collection, ctx)
+      output = subject.render(collection, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: [
@@ -219,7 +225,7 @@ RSpec.describe Verse::JsonApi::Renderer do
 
   context "render custom object" do
     it "renders a hash" do
-      output = subject.render({ test: "test" }, ctx)
+      output = subject.render({ test: "test" }, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: {
@@ -234,7 +240,7 @@ RSpec.describe Verse::JsonApi::Renderer do
     it "renders a model" do
       model = CategoryRecord.new({ name: "test" })
 
-      output = subject.render(model, ctx)
+      output = subject.render(model, server)
       expect(JSON.parse(output, symbolize_names: true)).to eq(
         {
           data: {
@@ -254,7 +260,7 @@ RSpec.describe Verse::JsonApi::Renderer do
       it "renders an error" do
         error = Verse::Error::Base.new("test")
 
-        output = subject.render(error, ctx)
+        output = subject.render(error, server)
         expect(JSON.parse(output, symbolize_names: true)).to eq(
           {
             errors: [
@@ -276,7 +282,7 @@ RSpec.describe Verse::JsonApi::Renderer do
       it "renders an error" do
         error = StandardError.new("test")
 
-        output = subject.render(error, ctx)
+        output = subject.render(error, server)
         expect(JSON.parse(output, symbolize_names: true)).to eq(
           {
             errors: [
