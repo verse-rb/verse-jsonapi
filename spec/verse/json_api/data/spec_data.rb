@@ -10,6 +10,8 @@ class UserRecord < Verse::Model::Record::Base
   has_one  :account
 end
 
+UserRepository = Class.new(Verse::Model::InMemory::Repository)
+
 class PostRecord < Verse::Model::Record::Base
   field :id, primary: true, type: Integer
 
@@ -26,6 +28,8 @@ class PostRecord < Verse::Model::Record::Base
   has_many :comments
 end
 
+PostRepository = Class.new(Verse::Model::InMemory::Repository)
+
 class CommentRecord < Verse::Model::Record::Base
   field :id, primary: true
 
@@ -38,9 +42,13 @@ class CommentRecord < Verse::Model::Record::Base
   belongs_to :post, foreign_key: :post_id
 end
 
+CommentRepository = Class.new(Verse::Model::InMemory::Repository)
+
 # non id primary key test.
 class CategoryRecord < Verse::Model::Record::Base
   field :name, primary: true
 
   has_many :posts, foreign_key: :category_name
 end
+
+CategoryRepository = Class.new(Verse::Model::InMemory::Repository)

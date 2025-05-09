@@ -64,7 +64,7 @@ module Verse
 
             # 3.2) setup repo:
             repo_class = value.opts[:repository]
-            repo_class = Util::Reflection.constantize(repo_class) if repo_class.is_a?(String)
+            repo_class = Verse::Util::Reflection.constantize(repo_class) if repo_class.is_a?(String)
             linked_repo = repo_class.new(auth_context)
 
             # 3.3) create or update the relation:

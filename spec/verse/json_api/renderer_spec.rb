@@ -34,6 +34,35 @@ RSpec.describe Verse::JsonApi::Renderer do
       )
     end
 
+    it "renders a model with belongs_to relationships" do
+      model = PostRecord.new({ id: 1, title: "Post 1", content: "Lorem", user_id: 2, category_name: "tech" })
+
+      output = subject.render(model, server)
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: {
+            type: "posts",
+            id: "1",
+            attributes: { title: "Post 1", content: "Lorem" },
+            relationships: {
+              user: {
+                data: {
+                  type: "users",
+                  id: "2"
+                }
+              },
+              category: {
+                data: {
+                  type: "categories",
+                  id: "tech"
+                }
+              }
+            }
+          }
+        }
+      )
+    end
+
     it "renders a model with included models" do
       set = Verse::Model::IncludeSet.new([:posts])
 
