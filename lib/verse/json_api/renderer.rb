@@ -69,11 +69,12 @@ module Verse
       def render_error(error, server)
         output = render_error_object(error)
 
-        if error.class.respond_to?(:http_code)
-          server.response.status = error.class.http_code
-        else
-          server.response.status = 500
-        end
+        server.response.status =
+          if error.class.respond_to?(:http_code)
+            error.class.http_code
+          else
+            500
+          end
 
         @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end
