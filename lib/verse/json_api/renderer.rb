@@ -69,11 +69,12 @@ module Verse
       def render_error(error, server)
         output = render_error_object(error)
 
-        if error.class.respond_to?(:http_code)
-          server.response.status = error.class.http_code
-        else
-          server.response.status = 500
-        end
+        server.response.status =
+          if error.class.respond_to?(:http_code)
+            error.class.http_code
+          else
+            500
+          end
 
         @pretty ? JSON.pretty_generate(output) : JSON.generate(output)
       end
@@ -217,49 +218,49 @@ module Verse
         end
       end
 
-  def render_relationships(record, field_set)
-    relationships = {}
+      def render_relationships(record, field_set)
+        relationships = {}
 
-    # Render explicitly included relationships
-    record.class.relations.slice(*record.local_included.map(&:to_sym)).each do |key, value|
-      relations = record.send(key)
+        # Render explicitly included relationships
+        record.class.relations.slice(*record.local_included.map(&:to_sym)).each do |key, value|
+          relations = record.send(key)
 
-      next unless relations
+          next unless relations
 
-      if value.opts[:array]
-        content = relations.map{ |r| render_record(r, field_set, true) }
-        relationships[key] = { data: content }
-      else
-        relationships[key] = { data: relations && render_record(relations, field_set, true) }
+          if value.opts[:array]
+            content = relations.map{ |r| render_record(r, field_set, true) }
+            relationships[key] = { data: content }
+          else
+            relationships[key] = { data: relations && render_record(relations, field_set, true) }
+          end
+        end
+
+        # Render belongs_to relationships that aren't explicitly included
+        record.class.relations.each do |key, value|
+          next if record.local_included.include?(key.to_s)
+          next unless value.opts[:type] == :belongs_to
+
+          foreign_key = value.opts[:foreign_key].to_sym
+          foreign_id = record[foreign_key]
+
+          next if foreign_id.nil?
+
+          # Get the related record class and its type
+          repository = value.opts[:repository]
+          repository = Verse::Util::Reflection.constantize(repository) if repository.is_a?(String)
+          related_record_class = value.opts[:record] || repository.model_class
+          related_record_class = Verse::Util::Reflection.constantize(related_record_class) if related_record_class.is_a?(String)
+
+          relationships[key] = {
+            data: {
+              type: related_record_class.type,
+              id: foreign_id.to_s
+            }
+          }
+        end
+
+        relationships.empty? ? nil : relationships
       end
-    end
-
-    # Render belongs_to relationships that aren't explicitly included
-    record.class.relations.each do |key, value|
-      next if record.local_included.include?(key.to_s)
-      next unless value.opts[:type] == :belongs_to
-
-      foreign_key = value.opts[:foreign_key].to_sym
-      foreign_id = record[foreign_key]
-
-      next if foreign_id.nil?
-
-      # Get the related record class and its type
-      repository = value.opts[:repository]
-      repository = Verse::Util::Reflection.constantize(repository) if repository.is_a?(String)
-      related_record_class = value.opts[:record] || repository.model_class
-      related_record_class = Verse::Util::Reflection.constantize(related_record_class) if related_record_class.is_a?(String)
-
-      relationships[key] = {
-        data: {
-          type: related_record_class.type,
-          id: foreign_id.to_s
-        }
-      }
-    end
-
-    relationships.empty? ? nil : relationships
-  end
 
       def render_metadata(object)
         object.respond_to?(:metadata) ? object.metadata : nil

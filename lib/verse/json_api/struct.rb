@@ -78,14 +78,13 @@ module Verse
             {
               type: type,
               id: id,
-
               attributes: attributes,
               relationships: relationships&.transform_values { |v|
                 case v
                 when Array
-                  { data: v.map{ |x| x.to_h(false) } }
+                  v.map{ |x| x.to_h(false) }
                 else
-                  { data: v&.to_h }
+                  v&.to_h
                 end
               }
             }.compact

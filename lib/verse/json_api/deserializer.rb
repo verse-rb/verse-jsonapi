@@ -63,7 +63,7 @@ module Verse
       def deserialize_data(data, object_reference_index, ref_operations)
         out = data.slice(:id, :type)
 
-        out[:attributes] = data[:attributes].dup
+        out[:attributes] = data[:attributes].dup if data[:attributes]
         struct = Struct.new(out, nil, data[:meta])
 
         # prepare the postprocessing pointers:
