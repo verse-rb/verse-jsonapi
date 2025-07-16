@@ -82,7 +82,7 @@ module Verse
               relationships: relationships&.transform_values { |v|
                 case v
                 when Array
-                  v.map{ |x| x.to_h(false) }
+                  { data: v.map{ |x| x.to_h(false) } }
                 else
                   v&.to_h
                 end

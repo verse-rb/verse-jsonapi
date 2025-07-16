@@ -50,7 +50,7 @@ module Verse
             end
 
             out
-          when Array, Verse::Util::ArrayWithMetadata
+          when Array, Verse::Util::ArrayWithMetadata, Enumerator
             render_collection(object, field_set)
           when Exception
             render_error_object(object)
@@ -141,6 +141,7 @@ module Verse
       end
 
       def render_collection(arr, field_set)
+        arr = arr.to_a if arr.is_a?(Enumerator)
         return { data: [], meta: render_metadata(arr) } if arr.empty?
 
         included = Set.new

@@ -211,6 +211,31 @@ RSpec.describe Verse::JsonApi::Renderer do
       )
     end
 
+    it "renders a collection from an enumerator" do
+      collection = [
+        UserRecord.new({ id: 1, name: "John", age: 20 }),
+        UserRecord.new({ id: 2, name: "Jane", age: 21 })
+      ].to_enum
+
+      output = subject.render(collection, server)
+      expect(JSON.parse(output, symbolize_names: true)).to eq(
+        {
+          data: [
+            {
+              type: "users",
+              id: "1",
+              attributes: { name: "John", age: 20 }
+            },
+            {
+              type: "users",
+              id: "2",
+              attributes: { name: "Jane", age: 21 }
+            }
+          ]
+        }
+      )
+    end
+
     it "renders an empty collection (array with metadata)" do
       collection = Verse::Util::ArrayWithMetadata.new([])
 
