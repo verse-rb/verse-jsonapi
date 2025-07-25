@@ -38,7 +38,12 @@ module Verse
           body = @body || default_body
 
           @exposition_class.class_eval do
-            expose on_http(dsl.method, Helper.build_path(dsl.parent.path, dsl.path), renderer: Verse::JsonApi::Renderer) do
+            expose on_http(
+              dsl.method,
+              Helper.build_path(dsl.parent.path, dsl.path),
+              renderer: Verse::JsonApi::Renderer,
+              **dsl.parent.http_opts
+            ) do
               desc "Update a `#{dsl.parent.resource_class.type}`"
               input dsl.update_schema
               meta(dsl.meta) if dsl.meta

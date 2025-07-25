@@ -13,15 +13,16 @@ module Verse
       class Root
         extend Helper
 
-        attr_reader :exposition_class, :resource_class
+        attr_reader :exposition_class, :resource_class, :http_opts
 
         instruction :path, ""
         instruction :service, :service
         instruction :allowed_included, [], type: :array
 
-        def initialize(exposition_class, resource_class, &block)
+        def initialize(exposition_class, resource_class, http_opts, &block)
           @exposition_class = exposition_class
           @resource_class   = resource_class
+          @http_opts = http_opts
           instance_eval(&block)
         end
 
